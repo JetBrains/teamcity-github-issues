@@ -43,7 +43,7 @@ public class SimpleTest {
   }
 
   private GitHub getMyGitHub() throws IOException {
-    return GitHub.connect("orybak", "4958bfb8793d375d247565ebbc1d67f34d067e7c");
+    return GitHub.connect("orybak", "sample_access_token");
   }
 
   @Test
