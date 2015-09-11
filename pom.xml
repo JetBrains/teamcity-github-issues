@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.jetbrains.teamcity</groupId>
+  <artifactId>TeamCity.GitHubIssues</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+    <url>http://jetbrains.com</url>
+  <properties>
+    <teamcity-version>10.0-SNAPSHOT</teamcity-version>
+  </properties>
+  <repositories>
+    <repository>
+      <id>JetBrains</id>
+      <url>http://repository.jetbrains.com/all</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>JetBrains</id>
+      <url>http://repository.jetbrains.com/all</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.jetbrains.teamcity</groupId>
+        <artifactId>teamcity-sdk-maven-plugin</artifactId>
+        <version>0.3-SNAPSHOT</version>
+        <configuration>
+          <teamcityDir>c:\dist\tc</teamcityDir> <!-- optional -->
+          <dataDirectory>c:\dist\PluginDev.Data.GitHubIssues</dataDirectory>
+          <teamcityVersion>10.0 EAP</teamcityVersion>
+          <startAgent>false</startAgent>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <modules>
+    <module>TeamCity.GitHubIssues-server</module>
+    <module>build</module>
+  </modules>
+</project>
