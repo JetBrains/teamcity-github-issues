@@ -17,14 +17,14 @@
       </td>
     </tr>
     <tr>
-      <th><label for="host" class="shortLabel">Server URL: <l:star/></label></th>
+      <th><label for="repository" class="shortLabel">Repository: <l:star/></label></th>
       <td>
-        <props:textProperty name="host" maxlength="100"/>
-        <span id="error_host" class="error"></span>
+        <props:textProperty name="repository" maxlength="100"/>
+        <span id="error_repository" class="error"></span>
       </td>
     </tr>
 
-    <props:selectProperty name="connecctionType" >
+    <props:selectProperty name="connectionType" >
       <props:option value="anonymous">Anonymous</props:option>
       <props:option value="loginpassword">Username / Password</props:option>
       <props:option value="accesstoken">Access Token</props:option>

@@ -36,7 +36,7 @@ public class SimpleTest {
     return GitHub.connectAnonymously();
   }
 
-  @Test
+  @Test(enabled = false)
   public void testConnect_Token() throws Exception {
     final GitHub gh = getMyGitHub();
     queryGitHub(gh);
@@ -48,7 +48,8 @@ public class SimpleTest {
 
   @Test
   public void testGetAllOpenIssues() throws Exception {
-    final GitHub gh = getMyGitHub();
+    //final GitHub gh = getMyGitHub();
+    final GitHub gh = getAnonymousGitHub();
     GHRepository repo = gh.getRepository("JetBrains/TeamCity.SharedResources");
     List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
     for (GHIssue issue: issues) {

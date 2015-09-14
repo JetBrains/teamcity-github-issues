@@ -1,10 +1,11 @@
 package jetbrains.buildServer.issueTracker.github;
 
-import java.util.HashMap;
-import java.util.Map;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,7 +53,7 @@ public class GitHubIssueProviderType extends IssueProviderType {
   @Override
   public Map<String, String> getDefaultProperties() {
     return new HashMap<String, String>() {{
-       put("pattern", "\\(d+)");
+       put("pattern", "#(\\d+)");
     }};
   }
 }
