@@ -35,19 +35,17 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
                             @NotNull String id,
                             @Nullable Credentials credentials) throws Exception {
     String url = getUrl(host, id);
-    String realId = getRealId(id);
+    int realId = getRealId(id);
     return getFromCacheOrFetch(url, new MyFetchFunction(host, realId, credentials));
   }
 
-  private String getRealId(final @NotNull String id) {
-    String realId;
-    final Matcher matcher = myPattern.matcher(id);
+  private int getRealId(@NotNull final String idString) {
+    final Matcher matcher = myPattern.matcher(idString);
     if (matcher.find()) {
-      realId = matcher.group(1);
+      return Integer.parseInt(matcher.group(1));
     } else {
-      realId = id;// throw exception
+      throw new IllegalArgumentException("Could not match issue id from [" + idString + "]");
     }
-    return realId;
   }
 
   @NotNull
@@ -66,16 +64,16 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
     @NotNull
     private final String myOwnerAnRepo;
 
-    @NotNull
-    private final String myIdString;
+    private final int myId;
+
     @Nullable
     private final Credentials myCredentials;
 
     public MyFetchFunction(@NotNull final String ownerAnRepo,
-                           @NotNull final String idString,
+                           final int id,
                            @Nullable final Credentials credentials) {
       myOwnerAnRepo = ownerAnRepo;
-      myIdString = idString;
+      myId = id;
       myCredentials = credentials;
     }
 
@@ -94,20 +92,19 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
         }
         gitHub = GitHub.connectUsingOAuth(token);
       } else {
-        UsernamePasswordCredentials creds = (UsernamePasswordCredentials)myCredentials;
+        UsernamePasswordCredentials cr = (UsernamePasswordCredentials)myCredentials;
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Connecting to " + myOwnerAnRepo + "using username + [" + creds.getUserName() + "] and password");
+          LOG.debug("Connecting to " + myOwnerAnRepo + "using username + [" + cr.getUserName() + "] and password");
         }
-        gitHub = GitHub.connectUsingPassword(creds.getUserName(), creds.getPassword());
+        gitHub = GitHub.connectUsingPassword(cr.getUserName(), cr.getPassword());
       }
-      GHRepository repository = gitHub.getRepository(myOwnerAnRepo); // why split then join?
-      // todo: here match myIdString to regexp
-      GHIssue issue = repository.getIssue(Integer.parseInt(myIdString));
+      GHRepository repository = gitHub.getRepository(myOwnerAnRepo);
+      GHIssue issue = repository.getIssue(myId);
       return createIssueData(issue);
     }
   }
 
-  static IssueData createIssueData(final GHIssue issue) {
+  private static IssueData createIssueData(final GHIssue issue) {
     // issue == null?
     return new IssueData(Integer.toString(issue.getId()), issue.getTitle(), issue.getState().name(), issue.getUrl().toString(), issue.getState() == GHIssueState.CLOSED);
   }
