@@ -44,7 +44,7 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
     if (matcher.find()) {
       return Integer.parseInt(matcher.group(1));
     } else {
-      throw new IllegalArgumentException("Could not match issue id from [" + idString + "]");
+      return Integer.parseInt(idString);
     }
   }
 
@@ -105,7 +105,6 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
   }
 
   private static IssueData createIssueData(final GHIssue issue) {
-    // issue == null?
-    return new IssueData(Integer.toString(issue.getId()), issue.getTitle(), issue.getState().name(), issue.getUrl().toString(), issue.getState() == GHIssueState.CLOSED);
+    return new IssueData(Integer.toString(issue.getNumber()), issue.getTitle(), issue.getState().name(), issue.getUrl().toString(), issue.getState() == GHIssueState.CLOSED);
   }
 }
