@@ -1,4 +1,4 @@
-package jetbrains.buildServer.issueTracker.github.credentials;
+package jetbrains.buildServer.issueTracker.github.auth;
 
 import org.apache.commons.httpclient.Credentials;
 import org.jetbrains.annotations.NotNull;

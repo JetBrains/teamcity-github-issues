@@ -1,15 +1,17 @@
 package jetbrains.buildServer.issueTracker.github;
 
-import java.util.regex.Pattern;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.issueTracker.IssueData;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.EventDispatcher;
+import jetbrains.buildServer.util.cache.EhCacheHelper;
 import jetbrains.buildServer.util.cache.EhCacheUtil;
 import jetbrains.buildServer.util.cache.ResetCacheRegisterImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,11 +25,11 @@ public class GitHubIssueFetcherTest extends BaseTestCase {
   @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
-    final EhCacheUtil ehCacheUtil = new EhCacheUtil(new ServerPaths(createTempDir().getAbsolutePath()),
+    final EhCacheHelper helper = new EhCacheUtil(new ServerPaths(createTempDir().getAbsolutePath()),
                                                     EventDispatcher.create(BuildServerListener.class),
                                                     new ResetCacheRegisterImpl());
 
-    myFetcher = new GitHubIssueFetcher(ehCacheUtil);
+    myFetcher = new GitHubIssueFetcher(helper);
     myFetcher.setPattern(Pattern.compile("#(\\d+)"));
   }
 

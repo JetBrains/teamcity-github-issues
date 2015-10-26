@@ -1,14 +1,15 @@
 package jetbrains.buildServer.issueTracker.github;
 
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import jetbrains.buildServer.issueTracker.AbstractIssueProvider;
 import jetbrains.buildServer.issueTracker.IssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
-import jetbrains.buildServer.issueTracker.github.credentials.GitHubAuthenticator;
+import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.

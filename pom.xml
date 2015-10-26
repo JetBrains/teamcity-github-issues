@@ -34,20 +34,36 @@
         </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.jetbrains.teamcity</groupId>
-        <artifactId>teamcity-sdk-maven-plugin</artifactId>
-        <version>0.3-SNAPSHOT</version>
-        <configuration>
-          <teamcityDir>c:\dist\tc</teamcityDir> <!-- optional -->
-          <dataDirectory>c:\dist\PluginDev.Data.GitHubIssues</dataDirectory>
-          <teamcityVersion>10.0 EAP</teamcityVersion>
-          <startAgent>false</startAgent>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>orybak-dev</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <dev.teamcity.dir>w:\dist\tc</dev.teamcity.dir>
+        <dev.teamcity.data.path>w:\dist\PluginDev.Data.GitHubIssues</dev.teamcity.data.path>
+        <dev.teamcity.version>10.0 EAP</dev.teamcity.version>
+        <dev.teamcity.start.agent>false</dev.teamcity.start.agent>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jetbrains.teamcity</groupId>
+            <artifactId>teamcity-sdk-maven-plugin</artifactId>
+            <version>0.3-SNAPSHOT</version>
+            <configuration>
+              <teamcityDir>${dev.teamcity.dir}</teamcityDir>
+              <dataDirectory>${dev.teamcity.data.path}</dataDirectory>
+              <teamcityVersion>${dev.teamcity.version}</teamcityVersion>
+              <startAgent>${dev.teamcity.start.agent}</startAgent>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
   <modules>
     <module>TeamCity.GitHubIssues-server</module>
     <module>build</module>
