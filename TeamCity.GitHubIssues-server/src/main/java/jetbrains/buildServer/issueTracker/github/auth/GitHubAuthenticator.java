@@ -1,6 +1,7 @@
 package jetbrains.buildServer.issueTracker.github.auth;
 
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
+import jetbrains.buildServer.issueTracker.github.GitHubConstants;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -19,14 +20,13 @@ public class GitHubAuthenticator implements IssueFetcherAuthenticator {
   private final Credentials myCredentials;
 
   public GitHubAuthenticator(@NotNull final Map<String, String> properties) {
-    final String authType = properties.get("authType");
-    if ("loginpassword".equals(authType)) {
-      final String username = properties.get("username");
-      final String password = properties.get("secure:password");
+    final String authType = properties.get(GitHubConstants.PARAM_AUTH_TYPE);
+    if (GitHubConstants.AUTH_LOGINPASSWORD.equals(authType)) {
+      final String username = properties.get(GitHubConstants.PARAM_USERNAME);
+      final String password = properties.get(GitHubConstants.PARAM_PASSWORD);
       myCredentials = new UsernamePasswordCredentials(username, password);
-    } else if ("accesstoken".equals(authType)) {
-      final String token = properties.get("secure:accessToken");
-      myCredentials = new TokenCredentials(token);
+    } else if (GitHubConstants.AUTH_ACCESSTOKEN.equals(authType)) {
+      myCredentials = new TokenCredentials(properties.get(GitHubConstants.AUTH_ACCESSTOKEN));
     } else {
       myCredentials = null;
     }

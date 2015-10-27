@@ -53,7 +53,8 @@ public class GitHubIssueProviderType extends IssueProviderType {
   @Override
   public Map<String, String> getDefaultProperties() {
     return new HashMap<String, String>() {{
-       put("pattern", "#(\\d+)");
+      put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_ANONYMOUS);
+      put(GitHubConstants.PARAM_PATTERN, "#(\\d+)");
     }};
   }
 }
