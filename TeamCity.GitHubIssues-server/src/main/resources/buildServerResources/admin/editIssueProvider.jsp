@@ -1,7 +1,9 @@
 <%@ include file="/include.jsp"%>
-<%@include file="providerConstants.jsp"%>
+<%@ include file="providerConstants.jsp"%>
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<jsp:useBean id="providerType" scope="request" type="jetbrains.buildServer.issueTracker.github.GitHubIssueProviderType"/>
 
 <script type="text/javascript">
   (function() {
@@ -33,7 +35,7 @@
     <c:if test="${showType}">
       <tr>
         <th><label class="shortLabel">Connection Type:</label></th>
-        <td>GitHub</td>
+        <td><bs:out value=" ${providerType.displayName}"/></td>
       </tr>
     </c:if>
     <tr>
@@ -47,6 +49,7 @@
       <th><label for="${repository}" class="shortLabel">Repository: <l:star/></label></th>
       <td>
         <props:textProperty name="${repository}" maxlength="100"/>
+        <span class="fieldExplanation">repository owner / repository name</span>
         <span id="error_${repository}" class="error"></span>
       </td>
     </tr>
@@ -82,6 +85,7 @@
       <th><label for="${accessToken}" class="shortLabel">Access token: <l:star/></label></th>
       <td>
         <props:passwordProperty name="${accessToken}" maxlength="100"/>
+        <span class="fieldExplanation">GitHub <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">personal access token</a></span>
         <span id="error_${accessToken}" class="error"></span>
       </td>
     </tr>
@@ -89,8 +93,8 @@
       <th><label for="${pattern}" class="shortLabel">Issue ID Pattern: <l:star/></label></th>
       <td>
         <props:textProperty name="${pattern}" maxlength="100"/>
-        <span id="error_${pattern}" class="error"></span>
         <span class="fieldExplanation">Use the regex syntax, e.g. #(\d+)<bs:help file="Integrating+TeamCity+with+Issue+Tracker"/></span>
+        <span id="error_${pattern}" class="error"></span>
       </td>
     </tr>
   </table>

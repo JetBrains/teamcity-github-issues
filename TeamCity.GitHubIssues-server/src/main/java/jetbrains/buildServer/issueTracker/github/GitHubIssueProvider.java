@@ -26,6 +26,9 @@ import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
 public class GitHubIssueProvider extends AbstractIssueProvider {
+
+  private static final Pattern REPOSITORY_PATTERN = Pattern.compile("(.+)/(.+)");
+
   public GitHubIssueProvider(@NotNull IssueProviderType type, @NotNull IssueFetcher fetcher) {
     super(type.getType(), fetcher);
   }
@@ -71,10 +74,10 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
   private static final PropertiesProcessor MY_PROCESSOR = new PropertiesProcessor() {
     public Collection<InvalidProperty> process(Map<String, String> map) {
       final List<InvalidProperty> result = new ArrayList<InvalidProperty>();
-      final String authTypeParam = map.get(PARAM_AUTH_TYPE);
-      checkNotEmptyParam(result, map, PARAM_AUTH_TYPE, "Authentication type must be specified");
-      if (result.isEmpty()) {
+
+      if (checkNotEmptyParam(result, map, PARAM_AUTH_TYPE, "Authentication type must be specified")) {
         // we have auth type. check against it
+        final String authTypeParam = map.get(PARAM_AUTH_TYPE);
         if (authTypeParam.equals(AUTH_LOGINPASSWORD)) {
           checkNotEmptyParam(result, map, PARAM_USERNAME, "Username must be specified");
           checkNotEmptyParam(result, map, PARAM_PASSWORD, "Password must be specified");
@@ -82,28 +85,36 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
           checkNotEmptyParam(result, map, PARAM_ACCESS_TOKEN, "Access token must be specified");
         }
       }
-      String patternString = map.get(PARAM_PATTERN);
-      if (!isEmptyOrSpaces(patternString)) {
-        result.add(new InvalidProperty(PARAM_PATTERN, "Issue pattern must not be empty"));
-      } else {
+      if (checkNotEmptyParam(result, map, PARAM_PATTERN, "Issue pattern must not be empty")) {
         try {
+          String patternString = map.get(PARAM_PATTERN);
           //noinspection ResultOfMethodCallIgnored
           Pattern.compile(patternString);
         } catch (PatternSyntaxException e) {
           result.add(new InvalidProperty(PARAM_PATTERN, "Syntax of issue pattern is not correct"));
         }
       }
+
+      if (checkNotEmptyParam(result, map, PARAM_REPOSITORY, "Repository must be specified")) {
+        String repo = map.get(PARAM_REPOSITORY);
+        final Matcher m = REPOSITORY_PATTERN.matcher(repo);
+        if (!m.matches()) {
+          result.add(new InvalidProperty(PARAM_REPOSITORY, "Repository must be in format 'owner/repository name'"));
+        }
+      }
       return result;
     }
 
 
-    private void checkNotEmptyParam(@NotNull final Collection<InvalidProperty> invalid,
-                                    @NotNull final Map<String, String> map,
-                                    @NotNull final String propertyName,
-                                    @NotNull final String errorMessage) {
+    private boolean checkNotEmptyParam(@NotNull final Collection<InvalidProperty> invalid,
+                                       @NotNull final Map<String, String> map,
+                                       @NotNull final String propertyName,
+                                       @NotNull final String errorMessage) {
       if (isEmptyOrSpaces(map.get(propertyName))) {
         invalid.add(new InvalidProperty(propertyName, errorMessage));
+        return false;
       }
+      return true;
     }
   };
 }
