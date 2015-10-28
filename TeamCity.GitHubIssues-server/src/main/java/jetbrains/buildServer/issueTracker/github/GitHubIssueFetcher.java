@@ -7,12 +7,11 @@ import jetbrains.buildServer.util.cache.EhCacheHelper;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.log4j.Logger;
+import org.eclipse.egit.github.core.Issue;
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.IssueService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHIssueState;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +61,10 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
   private static class MyFetchFunction implements FetchFunction {
 
     @NotNull
-    private final String myOwnerAnRepo;
+    private final String myOwner;
+
+    @NotNull
+    private final String myRepo;
 
     private final int myId;
 
@@ -72,39 +74,38 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
     public MyFetchFunction(@NotNull final String ownerAnRepo,
                            final int id,
                            @Nullable final Credentials credentials) {
-      myOwnerAnRepo = ownerAnRepo;
+      final String[] str = ownerAnRepo.split("/");
+      myOwner = str[0];
+      myRepo = str[1];
       myId = id;
       myCredentials = credentials;
     }
 
     @NotNull
     public IssueData fetch() throws Exception {
-      final GitHub gitHub;
+      final GitHubClient client = new GitHubClient();
       if (myCredentials == null) {
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Connecting to " + myOwnerAnRepo + "anonymously");
+          LOG.debug("Connecting to " + myOwner + "/" + myRepo + "anonymously");
         }
-        gitHub = GitHub.connectAnonymously();
       } else if (myCredentials instanceof TokenCredentials) {
         final String token = ((TokenCredentials) myCredentials).getToken();
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Connecting to " + myOwnerAnRepo + "using token starting with [" + token.substring(0, Math.min(2, token.length())) + "]");
+          LOG.debug("Connecting to " + myOwner + "/" + myRepo + "using token starting with [" + token.substring(0, Math.min(2, token.length())) + "]");
         }
-        gitHub = GitHub.connectUsingOAuth(token);
+        client.setOAuth2Token(token);
       } else {
         UsernamePasswordCredentials cr = (UsernamePasswordCredentials)myCredentials;
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Connecting to " + myOwnerAnRepo + "using username + [" + cr.getUserName() + "] and password");
+          LOG.debug("Connecting to " + myOwner + "/" + myRepo + "using username + [" + cr.getUserName() + "] and password");
         }
-        gitHub = GitHub.connectUsingPassword(cr.getUserName(), cr.getPassword());
+        client.setCredentials(cr.getUserName(), cr.getPassword());
       }
-      GHRepository repository = gitHub.getRepository(myOwnerAnRepo);
-      GHIssue issue = repository.getIssue(myId);
-      return createIssueData(issue);
+      return createIssueData(new IssueService(client).getIssue(myOwner, myRepo, myId));
     }
   }
 
-  private static IssueData createIssueData(final GHIssue issue) {
-    return new IssueData(Integer.toString(issue.getNumber()), issue.getTitle(), issue.getState().name(), issue.getUrl().toString(), issue.getState() == GHIssueState.CLOSED);
+  private static IssueData createIssueData(final Issue issue) {
+    return new IssueData(Integer.toString(issue.getNumber()), issue.getTitle(), issue.getState(), issue.getHtmlUrl(), IssueService.STATE_CLOSED.equals(issue.getState()));
   }
 }
