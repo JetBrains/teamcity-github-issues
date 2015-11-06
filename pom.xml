@@ -58,6 +58,7 @@
               <dataDirectory>${dev.teamcity.data.path}</dataDirectory>
               <teamcityVersion>${dev.teamcity.version}</teamcityVersion>
               <startAgent>${dev.teamcity.start.agent}</startAgent>
+              <serverDebugStr>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=10111 -Dteamcity.development.mode=true -Dteamcity.oauthProviders.enabled=true</serverDebugStr>
             </configuration>
           </plugin>
         </plugins>

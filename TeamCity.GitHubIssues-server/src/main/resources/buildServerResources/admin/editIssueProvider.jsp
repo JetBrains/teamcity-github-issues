@@ -9,12 +9,15 @@
   (function() {
     BS.GitHubIssues = {
       selectedAuth: undefined,
+      selector: undefined,
+
       init: function(select) {
-        this.selectAuthType($(select));
+        this.selector = $(select);
+        this.selectAuthType();
       },
 
-      selectAuthType: function(select) {
-        this.selectedAuth = select.value;
+      selectAuthType: function() {
+        this.selectedAuth = this.selector.value;
         this.onTypeChanged();
       },
 
@@ -58,7 +61,7 @@
       <td>
         <props:selectProperty name="${authType}"
                               id="${authType}_select"
-                              onchange="BS.GitHubIssues.selectAuthType(this);">
+                              onchange="BS.GitHubIssues.selectAuthType();">
           <props:option value="${authAnonymous}">Anonymous</props:option>
           <props:option value="${authLoginPassword}">Username / Password</props:option>
           <props:option value="${authAccessToken}">Access Token</props:option>
@@ -100,6 +103,20 @@
   </table>
 </div>
 
+<jsp:include page="/oauth/github/repositories.html?addControls=true&projectId=${project.externalId}"/>
+
 <script type="text/javascript">
   BS.GitHubIssues.init('${authType}_select');
+  $j(document).ready(function() {
+    if (BS.Repositories != null) {
+      BS.Repositories.installControls($('repository'), function(repoInfo) {
+        var ownerAndRepo = repoInfo.owner + "/" + repoInfo.name;
+        $('${name}').value = ownerAndRepo;
+        $('${repository}').value = ownerAndRepo;
+        $('${accessToken}').value = "oauth:" + repoInfo.oauthProviderId;
+        $('${authType}_select').value = "${authAccessToken}";
+        BS.GitHubIssues.selectAuthType();
+      });
+    }
+  });
 </script>

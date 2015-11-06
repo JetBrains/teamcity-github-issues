@@ -9,7 +9,6 @@
   <artifactId>TeamCity.GitHubIssues-server</artifactId>
   <packaging>jar</packaging>
   <dependencies>
-
     <dependency>
       <groupId>org.jetbrains.teamcity</groupId>
       <artifactId>server-api</artifactId>
@@ -39,11 +38,19 @@
       <scope>test</scope>
     </dependency>
 
-
     <dependency>
       <groupId>org.eclipse.mylyn.github</groupId>
       <artifactId>org.eclipse.egit.github.core</artifactId>
       <version>4.1.0.201509280440-r</version>
+      <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.jetbrains.teamcity</groupId>
+      <artifactId>oauth</artifactId>
+      <version>${teamcity-version}</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 </project>
