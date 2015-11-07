@@ -113,7 +113,7 @@
         var ownerAndRepo = repoInfo.owner + "/" + repoInfo.name;
         $('${name}').value = ownerAndRepo;
         $('${repository}').value = ownerAndRepo;
-        $('${accessToken}').value = "oauth:" + repoInfo.oauthProviderId;
+        $('${accessToken}').value = "oauth:" + repoInfo.username + ":" + repoInfo.oauthProviderId;
         $('${authType}_select').value = "${authAccessToken}";
         BS.GitHubIssues.selectAuthType();
       });

@@ -35,9 +35,9 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
 
   public GitHubIssueProvider(@NotNull IssueProviderType type,
                              @NotNull IssueFetcher fetcher,
-                             @NotNull PersonalOAuthTokens myTokens) {
+                             @NotNull PersonalOAuthTokens tokens) {
     super(type.getType(), fetcher);
-    this.myTokens = myTokens;
+    myTokens = tokens;
   }
 
   @NotNull

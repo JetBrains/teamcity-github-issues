@@ -12,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,7 +22,9 @@ import java.util.Set;
  */
 public class GitHubAuthenticator implements IssueFetcherAuthenticator {
 
-  private final Credentials myCredentials;
+  private static final Pattern OAUTH_PATTERN = Pattern.compile("^oauth:(.+):(.+)$");
+
+  private Credentials myCredentials = null;
 
   public GitHubAuthenticator(@NotNull final Map<String, String> properties,
                              @NotNull final PersonalOAuthTokens personalTokens) {
@@ -30,29 +34,33 @@ public class GitHubAuthenticator implements IssueFetcherAuthenticator {
       final String password = properties.get(GitHubConstants.PARAM_PASSWORD);
       myCredentials = new UsernamePasswordCredentials(username, password);
     } else if (GitHubConstants.AUTH_ACCESSTOKEN.equals(authType)) {
-      final String token = properties.get(GitHubConstants.AUTH_ACCESSTOKEN);
+      final String token = properties.get(GitHubConstants.PARAM_ACCESS_TOKEN);
       if (!StringUtil.isEmptyOrSpaces(token)) {
         if (token.startsWith("oauth:")) {
-          final String providerId = token.substring("oauth:".length());
-          if (!StringUtil.isEmptyOrSpaces(providerId)) {
+          // oauth token
+          final Matcher m = OAUTH_PATTERN.matcher(token);
+          if (m.matches() && m.groupCount() == 2) {
+            final String username = m.group(1);
+            final String providerId = m.group(2);
             final Set<PersonalOAuthTokens.Token> tokens = personalTokens.getTokens(providerId);
             if (!tokens.isEmpty()) {
-              // todo: get user
-              myCredentials = new TokenCredentials(tokens.iterator().next().getToken());
-            } else {
-              myCredentials = null;
+              PersonalOAuthTokens.Token result = null;
+              for (PersonalOAuthTokens.Token t: tokens) {
+                if (t.getOwner().equals(username)) {
+                  result = t;
+                  break;
+                }
+              }
+              if (result != null) {
+                myCredentials = new TokenCredentials(result.getToken());
+              }
             }
-          } else {
-            myCredentials = null;
           }
         } else {
+          // personal token
           myCredentials = new TokenCredentials(token);
         }
-      } else {
-        myCredentials = null;
       }
-    } else {
-      myCredentials = null;
     }
   }
 
