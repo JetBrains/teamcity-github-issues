@@ -2,7 +2,6 @@ package jetbrains.buildServer.issueTracker.github.auth;
 
 import com.intellij.openapi.util.text.StringUtil;
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
-import jetbrains.buildServer.issueTracker.github.GitHubConstants;
 import jetbrains.buildServer.serverSide.oauth.PersonalOAuthTokens;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpMethod;
@@ -15,6 +14,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
+
 /**
  * Created with IntelliJ IDEA.
  *
@@ -22,21 +23,21 @@ import java.util.regex.Pattern;
  */
 public class GitHubAuthenticator implements IssueFetcherAuthenticator {
 
-  private static final Pattern OAUTH_PATTERN = Pattern.compile("^oauth:(.+):(.+)$");
+  private static final Pattern OAUTH_PATTERN = Pattern.compile("^" + TOKEN_PREFIX_OAUTH + "(.+):(.+)$");
 
   private Credentials myCredentials = null;
 
   public GitHubAuthenticator(@NotNull final Map<String, String> properties,
                              @NotNull final PersonalOAuthTokens personalTokens) {
-    final String authType = properties.get(GitHubConstants.PARAM_AUTH_TYPE);
-    if (GitHubConstants.AUTH_LOGINPASSWORD.equals(authType)) {
-      final String username = properties.get(GitHubConstants.PARAM_USERNAME);
-      final String password = properties.get(GitHubConstants.PARAM_PASSWORD);
+    final String authType = properties.get(PARAM_AUTH_TYPE);
+    if (AUTH_LOGINPASSWORD.equals(authType)) {
+      final String username = properties.get(PARAM_USERNAME);
+      final String password = properties.get(PARAM_PASSWORD);
       myCredentials = new UsernamePasswordCredentials(username, password);
-    } else if (GitHubConstants.AUTH_ACCESSTOKEN.equals(authType)) {
-      final String token = properties.get(GitHubConstants.PARAM_ACCESS_TOKEN);
+    } else if (AUTH_ACCESSTOKEN.equals(authType)) {
+      final String token = properties.get(PARAM_ACCESS_TOKEN);
       if (!StringUtil.isEmptyOrSpaces(token)) {
-        if (token.startsWith("oauth:")) {
+        if (token.startsWith(TOKEN_PREFIX_OAUTH)) {
           // oauth token
           final Matcher m = OAUTH_PATTERN.matcher(token);
           if (m.matches() && m.groupCount() == 2) {
