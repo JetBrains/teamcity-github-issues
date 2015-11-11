@@ -3,7 +3,6 @@ package jetbrains.buildServer.issueTracker.github;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
-import jetbrains.buildServer.serverSide.oauth.PersonalOAuthTokens;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.testng.annotations.BeforeMethod;
@@ -17,15 +16,12 @@ import java.util.Map;
  */
 public class GitHubAuthenticatorTest extends BaseTestCase {
 
-  private PersonalOAuthTokens myTokens;
-
   private Map<String, String> myProperties;
 
   @Override
   @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
-    myTokens = new PersonalOAuthTokens();
     myProperties = new HashMap<String, String>();
   }
 
@@ -60,55 +56,13 @@ public class GitHubAuthenticatorTest extends BaseTestCase {
   }
 
   @Test
-  public void testToken_OAuth_WrongFormat() throws Exception {
-    myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_ACCESSTOKEN);
-    myProperties.put(GitHubConstants.PARAM_ACCESS_TOKEN, "oauth:someinvalidstringwithoutuser");
-    final Credentials result = getCredentials();
-    assertNull(result);
-  }
-
-  @Test
   public void testToken_OAuth_NoTokensStored() throws Exception {
     myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_ACCESSTOKEN);
-    myProperties.put(GitHubConstants.PARAM_ACCESS_TOKEN, "oauth:user:provider1");
     final Credentials result = getCredentials();
     assertNull(result);
-  }
-
-
-  @Test
-  public void testToken_OAuth_UserNotFound() throws Exception {
-    myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_ACCESSTOKEN);
-    myProperties.put(GitHubConstants.PARAM_ACCESS_TOKEN, "oauth:user1:provider1");
-    myTokens.rememberToken("provider1", "user2", "29505c65d0c8529c9e66c419f6480c4a", "everything");
-    final Credentials result = getCredentials();
-    assertNull(result);
-  }
-
-  @Test
-  public void testToken_OAuth_MultipleTokens() throws Exception {
-    myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_ACCESSTOKEN);
-    myProperties.put(GitHubConstants.PARAM_ACCESS_TOKEN, "oauth:user1:provider1");
-    myTokens.rememberToken("provider1", "user1", "29505c65d0c8529c9e66c419f6480c4a", "everything");
-    myTokens.rememberToken("provider1", "user2", "someothertoken", "everything");
-    final Credentials result = getCredentials();
-    assertNotNull(result);
-    assertTrue(result instanceof TokenCredentials);
-    assertEquals("29505c65d0c8529c9e66c419f6480c4a", ((TokenCredentials)result).getToken());
-  }
-
-  @Test
-  public void testToken_OAuth_Valid() throws Exception {
-    myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_ACCESSTOKEN);
-    myProperties.put(GitHubConstants.PARAM_ACCESS_TOKEN, "oauth:user1:provider1");
-    myTokens.rememberToken("provider1", "user1", "29505c65d0c8529c9e66c419f6480c4a", "everything");
-    final Credentials result = getCredentials();
-    assertNotNull(result);
-    assertTrue(result instanceof TokenCredentials);
-    assertEquals("29505c65d0c8529c9e66c419f6480c4a", ((TokenCredentials)result).getToken());
   }
 
   private Credentials getCredentials() {
-    return new GitHubAuthenticator(myProperties, myTokens).getCredentials();
+    return new GitHubAuthenticator(myProperties).getCredentials();
   }
 }

@@ -17,6 +17,4 @@ public interface GitHubConstants {
   String AUTH_ANONYMOUS = "anonymous";
   String AUTH_LOGINPASSWORD = "loginpassword";
   String AUTH_ACCESSTOKEN = "accesstoken";
-
-  String TOKEN_PREFIX_OAUTH = "oauth:";
 }

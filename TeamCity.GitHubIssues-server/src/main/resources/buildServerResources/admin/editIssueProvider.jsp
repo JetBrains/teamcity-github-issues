@@ -52,6 +52,7 @@
       <th><label for="${repository}" class="shortLabel">Repository: <l:star/></label></th>
       <td>
         <props:textProperty name="${repository}" maxlength="100"/>
+        <jsp:include page="/admin/repositoryControls.html?projectId=${project.externalId}&pluginName=github"/>
         <span class="fieldExplanation">repository owner / repository name</span>
         <span id="error_${repository}" class="error"></span>
       </td>
@@ -103,17 +104,15 @@
   </table>
 </div>
 
-<jsp:include page="/oauth/github/repositories.html?addControls=true&projectId=${project.externalId}"/>
-
 <script type="text/javascript">
   BS.GitHubIssues.init('${authType}_select');
   $j(document).ready(function() {
     if (BS.Repositories != null) {
-      BS.Repositories.installControls($('repository'), function(repoInfo) {
+      BS.Repositories.installControls($('repository'), function(repoInfo, cre) {
         var ownerAndRepo = repoInfo.owner + "/" + repoInfo.name;
         $('${name}').value = ownerAndRepo;
         $('${repository}').value = ownerAndRepo;
-        $('${accessToken}').value = "oauth:" + repoInfo.username + ":" + repoInfo.oauthProviderId;
+        $('${accessToken}').value = cre.oauthProviderId;
         $('${authType}_select').value = "${authAccessToken}";
         BS.GitHubIssues.selectAuthType();
       });

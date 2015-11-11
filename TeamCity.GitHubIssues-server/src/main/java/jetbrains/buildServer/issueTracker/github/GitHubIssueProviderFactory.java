@@ -4,7 +4,6 @@ import jetbrains.buildServer.issueTracker.AbstractIssueProviderFactory;
 import jetbrains.buildServer.issueTracker.IssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueProvider;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
-import jetbrains.buildServer.serverSide.oauth.PersonalOAuthTokens;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -14,18 +13,14 @@ import org.jetbrains.annotations.NotNull;
  */
 public class GitHubIssueProviderFactory extends AbstractIssueProviderFactory {
 
-  @NotNull
-  private final PersonalOAuthTokens myTokens;
 
   public GitHubIssueProviderFactory(@NotNull IssueProviderType type,
-                                    @NotNull IssueFetcher fetcher,
-                                    @NotNull PersonalOAuthTokens tokens) {
+                                    @NotNull IssueFetcher fetcher) {
     super(type, fetcher);
-    myTokens = tokens;
   }
 
   @NotNull
   public IssueProvider createProvider() {
-    return new GitHubIssueProvider(myType, myFetcher, myTokens);
+    return new GitHubIssueProvider(myType, myFetcher);
   }
 }

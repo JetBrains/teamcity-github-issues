@@ -7,7 +7,6 @@ import jetbrains.buildServer.issueTracker.IssueProviderType;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
-import jetbrains.buildServer.serverSide.oauth.PersonalOAuthTokens;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -30,20 +29,15 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
 
   private static final Pattern REPOSITORY_PATTERN = Pattern.compile("(.+)/(.+)");
 
-  @NotNull
-  private final PersonalOAuthTokens myTokens;
-
   public GitHubIssueProvider(@NotNull IssueProviderType type,
-                             @NotNull IssueFetcher fetcher,
-                             @NotNull PersonalOAuthTokens tokens) {
+                             @NotNull IssueFetcher fetcher) {
     super(type.getType(), fetcher);
-    myTokens = tokens;
   }
 
   @NotNull
   @Override
   protected IssueFetcherAuthenticator getAuthenticator() {
-    return new GitHubAuthenticator(myProperties, myTokens);
+    return new GitHubAuthenticator(myProperties);
   }
 
   @Override
