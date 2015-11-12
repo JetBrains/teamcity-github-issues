@@ -33,9 +33,16 @@ public class GitHubIssueFetcherTest extends BaseTestCase {
     myFetcher.setPattern(Pattern.compile("#(\\d+)"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testGetIssueAnonymously() throws Exception {
-    IssueData data = myFetcher.getIssue("JetBrains/TeamCity.SharedResources", "#9", null);
+    IssueData data = myFetcher.getIssue("http://github.com/JetBrains/TeamCity.SharedResources", "#9", null);
+    assertNotNull(data);
+    System.out.println(data.toString());
+  }
+
+  @Test(enabled = false)
+  public void testGHEAnonymously() throws Exception {
+    IssueData data = myFetcher.getIssue("http://teamcity-github-enterprise.labs.intellij.net/orybak/ent-repo-public", "#1", null);
     assertNotNull(data);
     System.out.println(data.toString());
   }

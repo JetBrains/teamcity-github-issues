@@ -3,6 +3,7 @@
 <%@ include file="providerConstants.jsp"%>
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="bs" tagdir="/WEB-INF/tags"%>
 
 <jsp:useBean id="providerType" scope="request" type="jetbrains.buildServer.issueTracker.github.GitHubIssueProviderType"/>
 
@@ -50,11 +51,10 @@
       </td>
     </tr>
     <tr>
-      <th><label for="${repository}" class="shortLabel">Repository: <l:star/></label></th>
+      <th><label for="${repository}" class="shortLabel">Repository URL: <l:star/></label></th>
       <td>
         <props:textProperty name="${repository}" maxlength="100"/>
         <jsp:include page="/admin/repositoryControls.html?projectId=${project.externalId}&pluginName=github"/>
-        <span class="fieldExplanation">repository owner / repository name</span>
         <span id="error_${repository}" class="error"></span>
       </td>
     </tr>
@@ -90,7 +90,7 @@
       <th><label for="${accessToken}" class="shortLabel">Access token: <l:star/></label></th>
       <td>
         <props:passwordProperty name="${accessToken}" maxlength="100"/>
-        <span class="fieldExplanation">GitHub <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">personal access token</a></span>
+        <span class="fieldExplanation">GitHub <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/"> access token</a></span>
         <span id="error_${accessToken}" class="error"></span>
       </td>
     </tr>
@@ -110,9 +110,8 @@
   $j(document).ready(function() {
     if (BS.Repositories != null) {
       BS.Repositories.installControls($('repository'), function(repoInfo, cre) {
-        var ownerAndRepo = repoInfo.owner + "/" + repoInfo.name;
-        $('${name}').value = ownerAndRepo;
-        $('${repository}').value = ownerAndRepo;
+        $('${name}').value = repoInfo.owner + "/" + repoInfo.name;
+        $('${repository}').value = repoInfo.repositoryUrl;
         $('${accessToken}').value = "oauth:<%=SessionUser.getUser(request).getId()%>:" + cre.oauthProviderId + ":" + cre.oauthLogin;
         $('${authType}_select').value = "${authAccessToken}";
         BS.GitHubIssues.selectAuthType();

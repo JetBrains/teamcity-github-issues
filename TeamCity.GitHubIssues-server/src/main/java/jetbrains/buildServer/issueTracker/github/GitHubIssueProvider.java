@@ -11,6 +11,8 @@ import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -110,9 +112,10 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
 
       if (checkNotEmptyParam(result, map, PARAM_REPOSITORY, "Repository must be specified")) {
         String repo = map.get(PARAM_REPOSITORY);
-        final Matcher m = REPOSITORY_PATTERN.matcher(repo);
-        if (!m.matches()) {
-          result.add(new InvalidProperty(PARAM_REPOSITORY, "Repository must be in format 'owner/repository name'"));
+        try {
+          new URL(repo);
+        } catch (MalformedURLException e) {
+          result.add(new InvalidProperty(PARAM_REPOSITORY, "Repository URL is not correct"));
         }
       }
       return result;
