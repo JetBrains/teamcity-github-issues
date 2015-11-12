@@ -1,3 +1,4 @@
+<%@ page import="jetbrains.buildServer.web.util.SessionUser" %>
 <%@ include file="/include.jsp"%>
 <%@ include file="providerConstants.jsp"%>
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
@@ -112,7 +113,7 @@
         var ownerAndRepo = repoInfo.owner + "/" + repoInfo.name;
         $('${name}').value = ownerAndRepo;
         $('${repository}').value = ownerAndRepo;
-        $('${accessToken}').value = cre.oauthProviderId;
+        $('${accessToken}').value = "oauth:<%=SessionUser.getUser(request).getId()%>:" + cre.oauthProviderId + ":" + cre.oauthLogin;
         $('${authType}_select').value = "${authAccessToken}";
         BS.GitHubIssues.selectAuthType();
       });

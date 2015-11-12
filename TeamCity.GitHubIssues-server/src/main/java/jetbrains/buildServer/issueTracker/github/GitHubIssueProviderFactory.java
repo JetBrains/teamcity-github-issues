@@ -4,6 +4,8 @@ import jetbrains.buildServer.issueTracker.AbstractIssueProviderFactory;
 import jetbrains.buildServer.issueTracker.IssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueProvider;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
+import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
+import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -13,14 +15,23 @@ import org.jetbrains.annotations.NotNull;
  */
 public class GitHubIssueProviderFactory extends AbstractIssueProviderFactory {
 
+  @NotNull
+  private final OAuthTokensStorage myStorage;
 
-  public GitHubIssueProviderFactory(@NotNull IssueProviderType type,
-                                    @NotNull IssueFetcher fetcher) {
+  @NotNull
+  private final UserModel myUserModel;
+
+  public GitHubIssueProviderFactory(@NotNull final IssueProviderType type,
+                                    @NotNull final IssueFetcher fetcher,
+                                    @NotNull final OAuthTokensStorage storage,
+                                    @NotNull final UserModel userModel) {
     super(type, fetcher);
+    myStorage = storage;
+    myUserModel = userModel;
   }
 
   @NotNull
   public IssueProvider createProvider() {
-    return new GitHubIssueProvider(myType, myFetcher);
+    return new GitHubIssueProvider(myType, myFetcher, myStorage, myUserModel);
   }
 }

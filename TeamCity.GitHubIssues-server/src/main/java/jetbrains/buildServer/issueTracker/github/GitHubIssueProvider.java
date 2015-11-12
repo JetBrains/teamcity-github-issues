@@ -7,6 +7,8 @@ import jetbrains.buildServer.issueTracker.IssueProviderType;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
+import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
+import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -29,15 +31,25 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
 
   private static final Pattern REPOSITORY_PATTERN = Pattern.compile("(.+)/(.+)");
 
-  public GitHubIssueProvider(@NotNull IssueProviderType type,
-                             @NotNull IssueFetcher fetcher) {
+  @NotNull
+  private final OAuthTokensStorage myStorage;
+
+  @NotNull
+  private final UserModel myUserModel;
+
+  public GitHubIssueProvider(@NotNull final IssueProviderType type,
+                             @NotNull final IssueFetcher fetcher,
+                             @NotNull final OAuthTokensStorage storage,
+                             @NotNull final UserModel userModel) {
     super(type.getType(), fetcher);
+    myStorage = storage;
+    myUserModel = userModel;
   }
 
   @NotNull
   @Override
   protected IssueFetcherAuthenticator getAuthenticator() {
-    return new GitHubAuthenticator(myProperties);
+    return new GitHubAuthenticator(myProperties, myStorage, myUserModel);
   }
 
   @Override
