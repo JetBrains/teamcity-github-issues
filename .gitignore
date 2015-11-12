@@ -43,6 +43,11 @@ buildNumber.properties
 
 ## Plugin-specific files:
 
+# Modules that are generated from maven
+TeamCity.GitHubIssues.iml
+TeamCity.GitHubIssues-server/TeamCity.GitHubIssues-server.iml
+build/build.iml
+
 # IntelliJ
 /out/
 
