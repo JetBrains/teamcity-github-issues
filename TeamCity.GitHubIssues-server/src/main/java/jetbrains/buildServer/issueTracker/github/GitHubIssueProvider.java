@@ -7,16 +7,16 @@ import jetbrains.buildServer.issueTracker.IssueProviderType;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
+import jetbrains.buildServer.serverSide.oauth.OAuthToken;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
+import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
+import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -31,7 +31,9 @@ import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
  */
 public class GitHubIssueProvider extends AbstractIssueProvider {
 
-  private static final Pattern REPOSITORY_PATTERN = Pattern.compile("(.+)/(.+)");
+  private static final String TOKEN_PREFIX_OAUTH = "oauth:";
+
+  private static final Pattern OAUTH_PATTERN = Pattern.compile("^" + TOKEN_PREFIX_OAUTH + "(.+):(.+):(.+)$");
 
   @NotNull
   private final OAuthTokensStorage myStorage;
@@ -51,7 +53,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
   @NotNull
   @Override
   protected IssueFetcherAuthenticator getAuthenticator() {
-    return new GitHubAuthenticator(myProperties, myStorage, myUserModel);
+    return new GitHubAuthenticator(myProperties);
   }
 
   @Override
@@ -59,6 +61,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
     super.setProperties(map);
     myHost = map.get(PARAM_REPOSITORY);
     myFetchHost = myHost;
+    patchPropertiesWithToken();
   }
 
   @NotNull
@@ -133,4 +136,34 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
       return true;
     }
   };
+
+  /**
+   * Replaces token 'coordinates with actual token'
+   */
+  private void patchPropertiesWithToken() {
+    final String token = myProperties.get(PARAM_ACCESS_TOKEN);
+    if (!StringUtil.isEmptyOrSpaces(token)) {
+      if (token.startsWith(TOKEN_PREFIX_OAUTH)) {
+        // oauth token
+        final Matcher m = OAUTH_PATTERN.matcher(token);
+        if (m.matches() && m.groupCount() == 3) {
+          final SUser tokenUser = myUserModel.findUserById(Long.parseLong(m.group(1)));
+          if (tokenUser != null) {
+            final String providerId = m.group(2);
+            final String oauthUserId = m.group(3);
+            final Set<OAuthToken> tokens = myStorage.getUserTokens(providerId, tokenUser);
+            OAuthToken result = null;
+            for (OAuthToken t: tokens) {
+              if (t.getOauthLogin().equals(oauthUserId)) {
+                result = t;
+              }
+            }
+            if (result != null) {
+              myProperties.put(PARAM_ACCESS_TOKEN, result.getToken());
+            }
+          }
+        }
+      }
+    }
+  }
 }

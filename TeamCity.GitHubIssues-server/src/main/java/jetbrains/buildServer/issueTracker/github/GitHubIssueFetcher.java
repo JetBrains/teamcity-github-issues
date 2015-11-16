@@ -27,7 +27,7 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
   private static final Logger LOG = Logger.getLogger(GitHubIssueFetcher.class.getName());
 
-  private final Pattern ownerAndRepoPattern = Pattern.compile("/?(.+)/(.+)/?");
+  private final Pattern ownerAndRepoPattern = Pattern.compile("/?([^/]+)/([^/]+)/?$");
 
   public GitHubIssueFetcher(@NotNull final EhCacheHelper helper) {
     super(helper);
