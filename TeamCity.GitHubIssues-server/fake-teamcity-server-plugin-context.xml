@@ -7,6 +7,8 @@
   <!-- this is a fake spring context xml to make IDEA know all implicit beans that are available for plugin -->
   <bean class="jetbrains.buildServer.web.openapi.PluginDescriptor"/>
 
-  <!--suppress SpringBeanConstructorArgInspection -->
+  <!--suppress SpringBeanConstructorArgInspection, SpringBeanAutowiringInspection -->
   <bean class="jetbrains.buildServer.util.cache.EhCacheUtil"/>
+  <bean class="jetbrains.buildServer.issueTracker.IssueProvidersManager"/>
+  <bean class="jetbrains.buildServer.web.openapi.PagePlaces"/>
 </beans>
