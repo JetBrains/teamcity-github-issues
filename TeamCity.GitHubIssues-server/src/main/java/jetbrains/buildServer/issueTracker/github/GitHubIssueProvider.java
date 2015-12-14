@@ -1,5 +1,11 @@
 package jetbrains.buildServer.issueTracker.github;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import jetbrains.buildServer.issueTracker.AbstractIssueProvider;
 import jetbrains.buildServer.issueTracker.IssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
@@ -13,13 +19,6 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import static com.intellij.openapi.util.text.StringUtil.isEmptyOrSpaces;
 import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
@@ -159,7 +158,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
               }
             }
             if (result != null) {
-              myProperties.put(PARAM_ACCESS_TOKEN, result.getToken());
+              myProperties.put(PARAM_ACCESS_TOKEN, result.getAccessToken());
             }
           }
         }
