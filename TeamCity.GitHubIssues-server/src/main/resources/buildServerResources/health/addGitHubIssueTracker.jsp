@@ -8,7 +8,7 @@
   Do you want to use GitHub issue tracker as well?
 
   <div class="suggestionAction">
-    <c:url var="url" value="/admin/editProject.html?projectId=${buildType.projectExternalId}&tab=issueTrackers&#add=add&addTracker=${type}&repoUrl=${util:urlEscape(repoUrl)}"/>
+    <c:url var="url" value="/admin/editProject.html?projectId=${buildType.projectExternalId}&tab=issueTrackers&#addTracker=${type}&repoUrl=${util:urlEscape(repoUrl)}"/>
     <a class="addNew" href="${url}">Use GitHub issue tracker</a>
   </div>
 </div>
