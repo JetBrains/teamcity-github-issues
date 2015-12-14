@@ -159,7 +159,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
               }
             }
             if (result != null) {
-              myProperties.put(PARAM_ACCESS_TOKEN, result.getToken());
+              myProperties.put(PARAM_ACCESS_TOKEN, result.getAccessToken());
             }
           }
         }
