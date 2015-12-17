@@ -89,6 +89,7 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
             data.put("vcsRoot", gitHubInstance);
             data.put("type", myType.getType());
             data.put("repoUrl", new URL("https", instanceUrl.getHost(), instanceUrl.getPath()));
+            data.put("suggestedName", instanceUrl.getPath().substring(1));
             result.add(new BuildTypeSuggestedItem(getType(), buildType, data));
           } catch (Exception ignored) {}
         }
