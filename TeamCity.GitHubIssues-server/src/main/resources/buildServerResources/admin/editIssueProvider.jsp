@@ -117,5 +117,13 @@
         BS.GitHubIssues.selectAuthType();
       });
     }
+    // if we have received some init values
+    // var params = window.location.search.toQueryParams();
+    var params = BS.IssueProviderForm.initOptions;
+    console.log(params);
+    if (params && params['addTracker']) {
+      $('${name}').value = decodeURIComponent(params['suggestedName']);
+      $('${repository}').value = decodeURIComponent(params['repoUrl']);
+    }
   });
 </script>
