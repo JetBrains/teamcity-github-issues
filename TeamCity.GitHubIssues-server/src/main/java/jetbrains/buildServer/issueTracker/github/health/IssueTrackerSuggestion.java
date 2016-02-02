@@ -1,7 +1,6 @@
 package jetbrains.buildServer.issueTracker.github.health;
 
 import com.intellij.openapi.util.text.StringUtil;
-import jetbrains.buildServer.issueTracker.IssueProviderEx;
 import jetbrains.buildServer.issueTracker.IssueProvidersManager;
 import jetbrains.buildServer.issueTracker.github.GitHubIssueProviderType;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -13,11 +12,11 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.healthStatus.suggestions.BuildTypeSuggestion;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,6 +27,9 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
 
   private static final String GIT_VCS_NAME = "jetbrains.git";
   private static final String GIT_FETCH_URL_PROPERTY = "url";
+
+  private static final Pattern sshPattern = Pattern.compile("git@github\\.com:(.+)/(.+)(?:\\.git)");
+  private static final Pattern httpsPattern = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)(?:\\.git)");
 
   @NotNull
   private final String myViewUrl;
@@ -53,45 +55,41 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
   public List<BuildTypeSuggestedItem> getSuggestions(@NotNull SBuildType buildType) {
     final SProject project = buildType.getProject();
     final String type = myType.getType();
-    final Map<String, IssueProviderEx> providers = myIssueProvidersManager.getProviders(project);
-    boolean alreadyUsed = false;
-    for (IssueProviderEx issueProviderEx: providers.values()) {
-      if (type.equals(issueProviderEx.getType())) {
-        alreadyUsed = true;
-        break;
-      }
-    }
-    List<BuildTypeSuggestedItem> result = new ArrayList<BuildTypeSuggestedItem>();
+    boolean alreadyUsed = myIssueProvidersManager.getProviders(project).values().stream()
+            .filter(it -> it.getType().equals(type))
+            .findFirst().isPresent();
+    final List<BuildTypeSuggestedItem> result = new ArrayList<>();
+    final List<Map<String, Object>> results = new ArrayList<>();
     if (!alreadyUsed) {
       List<VcsRootInstance> vcsRoots = buildType.getVcsRootInstances();
       if (!vcsRoots.isEmpty()) {
-        VcsRootInstance gitHubInstance = null;
-        URL instanceUrl = null;
         for (VcsRootInstance instance: vcsRoots) {
           if (GIT_VCS_NAME.equals(instance.getVcsName())) {
             String fetchUrl = instance.getProperty(GIT_FETCH_URL_PROPERTY);
             if (!StringUtil.isEmptyOrSpaces(fetchUrl)) {
-              try {
-                URL url = new URL(fetchUrl);
-                if ("github.com".equals(url.getHost())) {
-                  gitHubInstance = instance;
-                  instanceUrl = url;
-                  break;
+              Matcher m;
+              boolean matched = false;
+              m = sshPattern.matcher(fetchUrl);
+              if (m.matches()) {
+                // we have github ssh url
+                final String owner = m.group(1);
+                final String repo = m.group(2);
+                results.add(getSuggestionMap(instance, owner, repo));
+                matched = true;
+              }
+              if (!matched) {
+                m = httpsPattern.matcher(fetchUrl);
+                if (m.matches()) {
+                  final String owner = m.group(1);
+                  final String repo = m.group(2);
+                  results.add(getSuggestionMap(instance, owner, repo));
                 }
-              } catch (Exception ignored) {
               }
             }
           }
         }
-        if (gitHubInstance != null) {
-          try {
-            final Map<String, Object> data = new HashMap<String, Object>();
-            data.put("vcsRoot", gitHubInstance);
-            data.put("type", myType.getType());
-            data.put("repoUrl", new URL("https", instanceUrl.getHost(), instanceUrl.getPath()));
-            data.put("suggestedName", instanceUrl.getPath().substring(1));
-            result.add(new BuildTypeSuggestedItem(getType(), buildType, data));
-          } catch (Exception ignored) {}
+        if (!results.isEmpty()) {
+          result.add(new BuildTypeSuggestedItem(getType(), buildType, Collections.singletonMap("suggestedTrackers", results)));
         }
       }
     }
@@ -99,10 +97,28 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
   }
 
   @NotNull
+  private Map<String, Object> getSuggestionMap(@NotNull final VcsRootInstance instance,
+                                               @NotNull final String owner,
+                                               @NotNull final String repo) {
+    final Map<String, Object> result = new HashMap<>();
+    result.put("vcsRoot", instance);
+    result.put("type", myType.getType());
+    result.put("suggestedName", owner + "/" + repo);
+    result.put("repoUrl", getIssueUrl(owner, repo));
+    return result;
+  }
+
+  private String getIssueUrl(String owner, String repo) {
+    try {
+      return new URL("https", "github.com", "/" + owner + "/" + repo).toString();
+    } catch (MalformedURLException e) {
+      return "";
+    }
+  }
+
+  @NotNull
   @Override
   public String getViewUrl() {
     return myViewUrl;
   }
-
-
 }
