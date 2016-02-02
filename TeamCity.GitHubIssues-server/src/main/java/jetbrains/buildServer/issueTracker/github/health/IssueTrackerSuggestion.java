@@ -55,9 +55,7 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
   public List<BuildTypeSuggestedItem> getSuggestions(@NotNull SBuildType buildType) {
     final SProject project = buildType.getProject();
     final String type = myType.getType();
-    boolean alreadyUsed = myIssueProvidersManager.getProviders(project).values().stream()
-            .filter(it -> it.getType().equals(type))
-            .findFirst().isPresent();
+    boolean alreadyUsed = myIssueProvidersManager.getProviders(project).values().stream().anyMatch(it -> it.getType().equals(type));
     final List<BuildTypeSuggestedItem> result = new ArrayList<>();
     final List<Map<String, Object>> results = new ArrayList<>();
     if (!alreadyUsed) {
