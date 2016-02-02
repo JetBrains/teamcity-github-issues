@@ -11,12 +11,12 @@ import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.healthStatus.suggestions.BuildTypeSuggestion;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,7 +28,10 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
   private static final String GIT_VCS_NAME = "jetbrains.git";
   private static final String GIT_FETCH_URL_PROPERTY = "url";
 
+  /* Matches github ssh urls of format git@github.com:owner/repo.git */
   private static final Pattern sshPattern = Pattern.compile("git@github\\.com:(.+)/(.+)(?:\\.git)");
+
+  /* Matches github http and https urls of format https://github.com/owner/repo.git */
   private static final Pattern httpsPattern = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)(?:\\.git)");
 
   @NotNull
@@ -57,37 +60,35 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
     final String type = myType.getType();
     boolean alreadyUsed = myIssueProvidersManager.getProviders(project).values().stream().anyMatch(it -> it.getType().equals(type));
     final List<BuildTypeSuggestedItem> result = new ArrayList<>();
-    final List<Map<String, Object>> results = new ArrayList<>();
     if (!alreadyUsed) {
-      List<VcsRootInstance> vcsRoots = buildType.getVcsRootInstances();
-      if (!vcsRoots.isEmpty()) {
-        for (VcsRootInstance instance: vcsRoots) {
-          if (GIT_VCS_NAME.equals(instance.getVcsName())) {
-            String fetchUrl = instance.getProperty(GIT_FETCH_URL_PROPERTY);
-            if (!StringUtil.isEmptyOrSpaces(fetchUrl)) {
-              Matcher m;
-              boolean matched = false;
-              m = sshPattern.matcher(fetchUrl);
-              if (m.matches()) {
-                // we have github ssh url
-                final String owner = m.group(1);
-                final String repo = m.group(2);
-                results.add(getSuggestionMap(instance, owner, repo));
-                matched = true;
-              }
-              if (!matched) {
-                m = httpsPattern.matcher(fetchUrl);
-                if (m.matches()) {
-                  final String owner = m.group(1);
-                  final String repo = m.group(2);
-                  results.add(getSuggestionMap(instance, owner, repo));
-                }
-              }
-            }
-          }
-        }
-        if (!results.isEmpty()) {
-          result.add(new BuildTypeSuggestedItem(getType(), buildType, Collections.singletonMap("suggestedTrackers", results)));
+      final List<Map<String, Object>> results = buildType.getVcsRootInstances().stream()
+              .filter(it -> GIT_VCS_NAME.equals(it.getVcsName()))
+              .map(this::toSuggestion)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toList());
+      if (!results.isEmpty()) {
+        result.add(new BuildTypeSuggestedItem(getType(), buildType, Collections.singletonMap("suggestedTrackers", results)));
+      }
+    }
+    return result;
+  }
+
+  @Nullable
+  private Map<String, Object> toSuggestion(@NotNull final VcsRootInstance instance) {
+    Map<String, Object> result = null;
+    final String fetchUrl = instance.getProperty(GIT_FETCH_URL_PROPERTY);
+    if (!StringUtil.isEmptyOrSpaces(fetchUrl)) {
+      Matcher m;
+      boolean matched = false;
+      m = sshPattern.matcher(fetchUrl);
+      if (m.matches()) {
+        result = getSuggestionMap(instance, m.group(1), m.group(2));
+        matched = true;
+      }
+      if (!matched) {
+        m = httpsPattern.matcher(fetchUrl);
+        if (m.matches()) {
+          result = getSuggestionMap(instance, m.group(1), m.group(2));
         }
       }
     }
@@ -102,16 +103,13 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
     result.put("vcsRoot", instance);
     result.put("type", myType.getType());
     result.put("suggestedName", owner + "/" + repo);
-    result.put("repoUrl", getIssueUrl(owner, repo));
+    result.put("repoUrl", getRepoUrl(owner, repo));
     return result;
   }
 
-  private String getIssueUrl(String owner, String repo) {
-    try {
-      return new URL("https", "github.com", "/" + owner + "/" + repo).toString();
-    } catch (MalformedURLException e) {
-      return "";
-    }
+  @NotNull
+  private String getRepoUrl(@NotNull final String owner, @NotNull final String repo) {
+    return "https://github.com/" + owner + "/" + repo;
   }
 
   @NotNull
