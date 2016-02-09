@@ -1,29 +1,29 @@
 package jetbrains.buildServer.issueTracker.github.health;
 
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import jetbrains.buildServer.issueTracker.IssueProvidersManager;
 import jetbrains.buildServer.issueTracker.github.GitHubIssueProviderType;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.healthStatus.BuildTypeSuggestedItem;
+import jetbrains.buildServer.serverSide.healthStatus.ProjectSuggestedItem;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
-import jetbrains.buildServer.web.openapi.healthStatus.suggestions.BuildTypeSuggestion;
+import jetbrains.buildServer.web.openapi.healthStatus.suggestions.ProjectSuggestion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
  *
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
-public class IssueTrackerSuggestion extends BuildTypeSuggestion {
+public class IssueTrackerSuggestion extends ProjectSuggestion {
 
   private static final String GIT_VCS_NAME = "jetbrains.git";
   private static final String GIT_FETCH_URL_PROPERTY = "url";
@@ -32,7 +32,10 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
   private static final Pattern sshPattern = Pattern.compile("git@github\\.com:(.+)/(.+)(?:\\.git)");
 
   /* Matches github http and https urls of format https://github.com/owner/repo.git */
-  private static final Pattern httpsPattern = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)(?:\\.git)");
+  private static final Pattern httpsPattern = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)(?:\\.git)$");
+
+  /* Matches github http and https urls of format https://github.com/owner/repo.git */
+  private static final Pattern httpsPatternNoGit = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)(?:\\.git)?$");
 
   @NotNull
   private final String myViewUrl;
@@ -53,28 +56,35 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
     myIssueProvidersManager = issueProvidersManager;
   }
 
+
+
+
   @NotNull
   @Override
-  public List<BuildTypeSuggestedItem> getSuggestions(@NotNull SBuildType buildType) {
-    final SProject project = buildType.getProject();
+  public List<ProjectSuggestedItem> getSuggestions(@NotNull final SProject project) {
     final String type = myType.getType();
     boolean alreadyUsed = myIssueProvidersManager.getProviders(project).values().stream().anyMatch(it -> it.getType().equals(type));
-    final List<BuildTypeSuggestedItem> result = new ArrayList<>();
+    final List<ProjectSuggestedItem> result = new ArrayList<>();
     if (!alreadyUsed) {
-      final List<Map<String, Object>> results = buildType.getVcsRootInstances().stream()
+      final Map<String, Map<String, Object>> results = new HashMap<>();
+      final Set<VcsRootInstance> instances = new HashSet<>();
+      for (SBuildType buildType: project.getOwnBuildTypes()) {
+        instances.addAll(buildType.getVcsRootInstances());
+      }
+      instances.stream()
               .filter(it -> GIT_VCS_NAME.equals(it.getVcsName()))
               .map(this::toSuggestion)
               .filter(Objects::nonNull)
-              .collect(Collectors.toList());
+              .forEach(pair -> results.put(pair.getFirst(), pair.getSecond()));
       if (!results.isEmpty()) {
-        result.add(new BuildTypeSuggestedItem(getType(), buildType, Collections.singletonMap("suggestedTrackers", results)));
+        result.add(new ProjectSuggestedItem(getType(), project, Collections.singletonMap("suggestedTrackers", results)));
       }
     }
     return result;
   }
 
   @Nullable
-  private Map<String, Object> toSuggestion(@NotNull final VcsRootInstance instance) {
+  private Pair<String, Map<String, Object>> toSuggestion(@NotNull final VcsRootInstance instance) {
     Map<String, Object> result = null;
     final String fetchUrl = instance.getProperty(GIT_FETCH_URL_PROPERTY);
     if (!StringUtil.isEmptyOrSpaces(fetchUrl)) {
@@ -89,10 +99,20 @@ public class IssueTrackerSuggestion extends BuildTypeSuggestion {
         m = httpsPattern.matcher(fetchUrl);
         if (m.matches()) {
           result = getSuggestionMap(instance, m.group(1), m.group(2));
+          matched = true;
+        }
+      }
+      if (!matched) {
+        m = httpsPatternNoGit.matcher(fetchUrl);
+        if (m.matches()) {
+          result = getSuggestionMap(instance, m.group(1), m.group(2));
         }
       }
     }
-    return result;
+    if (result != null) {
+      return new Pair<>((String) result.get("repoUrl"), result);
+    }
+    return null;
   }
 
   @NotNull

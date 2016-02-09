@@ -6,7 +6,7 @@ import jetbrains.buildServer.issueTracker.IssueProvidersManager;
 import jetbrains.buildServer.issueTracker.github.health.IssueTrackerSuggestion;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.healthStatus.BuildTypeSuggestedItem;
+import jetbrains.buildServer.serverSide.healthStatus.ProjectSuggestedItem;
 import jetbrains.buildServer.util.TestFor;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.buildServer.web.openapi.PagePlaces;
@@ -51,8 +51,12 @@ public class SuggestionsTest extends BaseTestCase {
       allowing(myPluginDescriptor);
       allowing(myPagePlaces);
 
-      allowing(myBuildType).getProject();
-      will(returnValue(myProject));
+      allowing(myProject).getOwnBuildTypes();
+      will(returnValue(Collections.singletonList(myBuildType)));
+
+      allowing(myProject).getProjectId();
+      will(returnValue("PROJECT_ID"));
+
     }});
     myType = new GitHubIssueProviderType(myPluginDescriptor);
     mySuggestion = new IssueTrackerSuggestion(myPluginDescriptor, myPagePlaces, myManager, myType);
@@ -75,7 +79,7 @@ public class SuggestionsTest extends BaseTestCase {
       will(returnValue(Collections.emptyList()));
 
     }});
-    final List<BuildTypeSuggestedItem> result = mySuggestion.getSuggestions(myBuildType);
+    final List<ProjectSuggestedItem> result = mySuggestion.getSuggestions(myProject);
     assertEmpty(result);
   }
 
@@ -92,7 +96,7 @@ public class SuggestionsTest extends BaseTestCase {
       will(returnValue(myType.getType()));
 
     }});
-    final List<BuildTypeSuggestedItem> result = mySuggestion.getSuggestions(myBuildType);
+    final List<ProjectSuggestedItem> result = mySuggestion.getSuggestions(myProject);
     assertEmpty(result);
   }
 
@@ -111,7 +115,7 @@ public class SuggestionsTest extends BaseTestCase {
       will(returnValue(Collections.emptyList()));
 
     }});
-    final List<BuildTypeSuggestedItem> result = mySuggestion.getSuggestions(myBuildType);
+    final List<ProjectSuggestedItem> result = mySuggestion.getSuggestions(myProject);
     assertEmpty(result);
   }
 
@@ -136,6 +140,20 @@ public class SuggestionsTest extends BaseTestCase {
     testSingleUrl(sourceUrl, expectedUrl);
   }
 
+  @Test
+  public void testNoDotGitHttp() throws Exception {
+    final String sourceUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
+    final String expectedUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
+    testSingleUrl(sourceUrl, expectedUrl);
+  }
+
+  @Test
+  public void testNoDotGitHttps() throws Exception {
+    final String sourceUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
+    final String expectedUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
+    testSingleUrl(sourceUrl, expectedUrl);
+  }
+
   @SuppressWarnings("unchecked")
   private void testSingleUrl(final String sourceUrl, String expectedUrl) {
     final VcsRootInstance instance = m.mock(VcsRootInstance.class);
@@ -151,19 +169,16 @@ public class SuggestionsTest extends BaseTestCase {
 
       oneOf(instance).getProperty("url");
       will(returnValue(sourceUrl));
-
-      oneOf(myBuildType).getBuildTypeId();
-      will(returnValue("buildTypeId"));
     }});
 
-    final List<BuildTypeSuggestedItem> result = mySuggestion.getSuggestions(myBuildType);
+    final List<ProjectSuggestedItem> result = mySuggestion.getSuggestions(myProject);
     assertEquals(1, result.size());
     final Map<String, Object> data = result.get(0).getAdditionalData();
     assertNotNull(data);
-    final List<Map<String, Object>> suggestedTrackers = (List<Map<String, Object>>)data.get("suggestedTrackers");
+    final Map<String, Map<String, Object>> suggestedTrackers = (Map<String, Map<String, Object>>) data.get("suggestedTrackers");
     assertNotNull(suggestedTrackers);
     assertEquals(1, suggestedTrackers.size());
-    assertEquals(expectedUrl, suggestedTrackers.get(0).get("repoUrl"));
+    assertEquals(expectedUrl, suggestedTrackers.values().iterator().next().get("repoUrl"));
   }
 
 }
