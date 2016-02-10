@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 /**
  * Created with IntelliJ IDEA.
@@ -67,12 +68,11 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
     final List<ProjectSuggestedItem> result = new ArrayList<>();
     if (!alreadyUsed) {
       final Map<String, Map<String, Object>> results = new HashMap<>();
-      final Set<VcsRootInstance> instances = new HashSet<>();
-      for (SBuildType buildType: project.getOwnBuildTypes()) {
-        instances.addAll(buildType.getVcsRootInstances());
-      }
-      instances.stream()
+      project.getOwnBuildTypes().stream()
+              .map(SBuildType::getVcsRootInstances)
+              .flatMap(it -> StreamSupport.stream(it.spliterator(), false))
               .filter(it -> GIT_VCS_NAME.equals(it.getVcsName()))
+              .distinct()
               .map(this::toSuggestion)
               .filter(Objects::nonNull)
               .forEach(pair -> results.put(pair.getFirst(), pair.getSecond()));
