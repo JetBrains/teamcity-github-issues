@@ -1,11 +1,5 @@
 package jetbrains.buildServer.issueTracker.github;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import jetbrains.buildServer.issueTracker.AbstractIssueProvider;
 import jetbrains.buildServer.issueTracker.IssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
@@ -19,6 +13,13 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import static com.intellij.openapi.util.text.StringUtil.isEmptyOrSpaces;
 import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
@@ -90,7 +91,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
 
   private static final PropertiesProcessor MY_PROCESSOR = new PropertiesProcessor() {
     public Collection<InvalidProperty> process(Map<String, String> map) {
-      final List<InvalidProperty> result = new ArrayList<InvalidProperty>();
+      final List<InvalidProperty> result = new ArrayList<>();
 
       if (checkNotEmptyParam(result, map, PARAM_AUTH_TYPE, "Authentication type must be specified")) {
         // we have auth type. check against it
