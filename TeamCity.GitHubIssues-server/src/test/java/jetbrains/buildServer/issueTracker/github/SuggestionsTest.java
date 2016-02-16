@@ -8,18 +8,18 @@ import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.healthStatus.ProjectSuggestedItem;
 import jetbrains.buildServer.util.TestFor;
+import jetbrains.buildServer.vcs.VcsRoot;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
+import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -75,12 +75,11 @@ public class SuggestionsTest extends BaseTestCase {
       oneOf(myManager).getProviders(myProject);
       will(returnValue(Collections.emptyMap()));
 
-      oneOf(myBuildType).getVcsRootInstances();
+      oneOf(myBuildType).getVcsRoots();
       will(returnValue(Collections.emptyList()));
 
     }});
-    final List<ProjectSuggestedItem> result = mySuggestion.getSuggestions(myProject);
-    assertEmpty(result);
+    checkSuggestions(mySuggestion.getSuggestions(myProject));
   }
 
   @Test
@@ -96,8 +95,7 @@ public class SuggestionsTest extends BaseTestCase {
       will(returnValue(myType.getType()));
 
     }});
-    final List<ProjectSuggestedItem> result = mySuggestion.getSuggestions(myProject);
-    assertEmpty(result);
+    checkSuggestions(mySuggestion.getSuggestions(myProject));
   }
 
   @Test
@@ -111,12 +109,11 @@ public class SuggestionsTest extends BaseTestCase {
       oneOf(provider).getType();
       will(returnValue("some other type"));
 
-      oneOf(myBuildType).getVcsRootInstances();
+      oneOf(myBuildType).getVcsRoots();
       will(returnValue(Collections.emptyList()));
 
     }});
-    final List<ProjectSuggestedItem> result = mySuggestion.getSuggestions(myProject);
-    assertEmpty(result);
+    checkSuggestions(mySuggestion.getSuggestions(myProject));
   }
 
   @Test
@@ -154,31 +151,85 @@ public class SuggestionsTest extends BaseTestCase {
     testSingleUrl(sourceUrl, expectedUrl);
   }
 
-  @SuppressWarnings("unchecked")
-  private void testSingleUrl(final String sourceUrl, String expectedUrl) {
-    final VcsRootInstance instance = m.mock(VcsRootInstance.class);
+  @Test
+  public void testParametrizedUrl() throws Exception {
+    final String sourceParametrizedUrl = "https://github.com/%project.owner%/%project.repo%";
+    final String sourceUrl1 = "https://github.com/JetBrains/TeamCity.GitHubIssues";
+    final String sourceUrl2 = "https://github.com/orybak/TeamCity.GitHubIssues";
+    final String expectedUrl1 = "https://github.com/JetBrains/TeamCity.GitHubIssues";
+    final String expectedUrl2 = "https://github.com/orybak/TeamCity.GitHubIssues";
+
+    final VcsRoot vcsRoot = m.mock(VcsRoot.class, "parametrized-url");
+    final VcsRootInstance instance1 = m.mock(VcsRootInstance.class, "real-instance-1");
+    final VcsRootInstance instance2 = m.mock(VcsRootInstance.class, "real-instance-2");
+
     m.checking(new Expectations() {{
       oneOf(myManager).getProviders(myProject);
       will(returnValue(Collections.emptyMap()));
 
-      oneOf(myBuildType).getVcsRootInstances();
-      will(returnValue(Collections.singletonList(instance)));
+      oneOf(myBuildType).getVcsRoots();
+      will(returnValue(Collections.singletonList(vcsRoot)));
 
-      oneOf(instance).getVcsName();
+      oneOf(vcsRoot).getVcsName();
       will(returnValue("jetbrains.git"));
 
-      oneOf(instance).getProperty("url");
-      will(returnValue(sourceUrl));
-    }});
+      oneOf(vcsRoot).getProperty("url");
+      will(returnValue(sourceParametrizedUrl));
 
-    final List<ProjectSuggestedItem> result = mySuggestion.getSuggestions(myProject);
-    assertEquals(1, result.size());
-    final Map<String, Object> data = result.get(0).getAdditionalData();
-    assertNotNull(data);
-    final Map<String, Map<String, Object>> suggestedTrackers = (Map<String, Map<String, Object>>) data.get("suggestedTrackers");
-    assertNotNull(suggestedTrackers);
-    assertEquals(1, suggestedTrackers.size());
-    assertEquals(expectedUrl, suggestedTrackers.values().iterator().next().get("repoUrl"));
+      oneOf(myBuildType).getVcsRootInstances();
+      will(returnValue(Arrays.asList(instance1, instance2)));
+
+      oneOf(instance1).getVcsName();
+      will(returnValue("jetbrains.git"));
+
+      oneOf(instance1).getProperty("url");
+      will(returnValue(sourceUrl1));
+
+      oneOf(instance2).getVcsName();
+      will(returnValue("jetbrains.git"));
+
+      oneOf(instance2).getProperty("url");
+      will(returnValue(sourceUrl2));
+    }});
+    checkSuggestions(mySuggestion.getSuggestions(myProject), expectedUrl1, expectedUrl2);
   }
 
+  @SuppressWarnings("unchecked")
+  private void testSingleUrl(final String sourceUrl, String expectedUrl) {
+    final VcsRoot root = m.mock(VcsRoot.class);
+    m.checking(new Expectations() {{
+      oneOf(myManager).getProviders(myProject);
+      will(returnValue(Collections.emptyMap()));
+
+      oneOf(myBuildType).getVcsRoots();
+      will(returnValue(Collections.singletonList(root)));
+
+      oneOf(root).getVcsName();
+      will(returnValue("jetbrains.git"));
+
+      oneOf(root).getProperty("url");
+      will(returnValue(sourceUrl));
+    }});
+    checkSuggestions(mySuggestion.getSuggestions(myProject), expectedUrl);
+  }
+
+  @SuppressWarnings("unchecked")
+  private void checkSuggestions(@NotNull final List<ProjectSuggestedItem> suggestions, String... expected) {
+    if (expected.length != 0) {
+      assertEquals(1, suggestions.size());
+      final Map<String, Object> data = suggestions.get(0).getAdditionalData();
+      assertNotNull(data);
+      final Map<String, Map<String, Object>> suggestedTrackers = (Map<String, Map<String, Object>>) data.get("suggestedTrackers");
+      assertNotNull(suggestedTrackers);
+      assertEquals(expected.length, suggestedTrackers.size());
+      assertContains(suggestedTrackers.keySet(), expected);
+      for (String key : expected) {
+        Map<String, Object> value = suggestedTrackers.get(key);
+        assertNotNull(value);
+        assertEquals(key, value.get("repoUrl"));
+      }
+    } else {
+      assertEmpty(suggestions);
+    }
+  }
 }

@@ -1,13 +1,14 @@
 package jetbrains.buildServer.issueTracker.github.health;
 
 import com.intellij.openapi.util.Pair;
-import com.intellij.openapi.util.text.StringUtil;
 import jetbrains.buildServer.issueTracker.IssueProvidersManager;
 import jetbrains.buildServer.issueTracker.github.GitHubIssueProviderType;
+import jetbrains.buildServer.parameters.ReferencesResolverUtil;
+import jetbrains.buildServer.serverSide.BuildTypeSettings;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.healthStatus.ProjectSuggestedItem;
-import jetbrains.buildServer.vcs.VcsRootInstance;
+import jetbrains.buildServer.vcs.VcsRoot;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.healthStatus.suggestions.ProjectSuggestion;
@@ -17,6 +18,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -57,9 +60,6 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
     myIssueProvidersManager = issueProvidersManager;
   }
 
-
-
-
   @NotNull
   @Override
   public List<ProjectSuggestedItem> getSuggestions(@NotNull final SProject project) {
@@ -67,15 +67,16 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
     boolean alreadyUsed = myIssueProvidersManager.getProviders(project).values().stream().anyMatch(it -> it.getType().equals(type));
     final List<ProjectSuggestedItem> result = new ArrayList<>();
     if (!alreadyUsed) {
+      final List<SBuildType> buildTypes = project.getOwnBuildTypes();
+      List<String> paths = getPathsFromVcsRoots(buildTypes);
+      if (paths.stream().anyMatch(ReferencesResolverUtil::mayContainReference)) {
+        paths = getPathsFromInstances(buildTypes);
+      }
       final Map<String, Map<String, Object>> results = new HashMap<>();
-      project.getOwnBuildTypes().stream()
-              .map(SBuildType::getVcsRootInstances)
-              .flatMap(it -> StreamSupport.stream(it.spliterator(), false))
-              .filter(it -> GIT_VCS_NAME.equals(it.getVcsName()))
-              .distinct()
+      paths.stream()
               .map(this::toSuggestion)
               .filter(Objects::nonNull)
-              .forEach(pair -> results.put(pair.getFirst(), pair.getSecond()));
+              .forEach(p -> results.put(p.first, p.second));
       if (!results.isEmpty()) {
         result.add(new ProjectSuggestedItem(getType(), project, Collections.singletonMap("suggestedTrackers", results)));
       }
@@ -83,30 +84,44 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
     return result;
   }
 
+  private List<String> getPathsFromVcsRoots(@NotNull final List<SBuildType> buildTypes) {
+    return extractFetchUrls(buildTypes.stream().map(BuildTypeSettings::getVcsRoots));
+  }
+
+  private List<String> getPathsFromInstances(@NotNull final List<SBuildType> buildTypes) {
+    return extractFetchUrls(buildTypes.stream().map(SBuildType::getVcsRootInstances));
+  }
+
+  private List<String> extractFetchUrls(@NotNull final Stream<List<? extends VcsRoot>> stream) {
+    return stream.flatMap(it -> StreamSupport.stream(it.spliterator(), false))
+            .filter(it -> GIT_VCS_NAME.equals(it.getVcsName()))
+            .map(it -> it.getProperty(GIT_FETCH_URL_PROPERTY))
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+  }
+
   @Nullable
-  private Pair<String, Map<String, Object>> toSuggestion(@NotNull final VcsRootInstance instance) {
+  private Pair<String, Map<String, Object>> toSuggestion(@NotNull final String fetchUrl) {
     Map<String, Object> result = null;
-    final String fetchUrl = instance.getProperty(GIT_FETCH_URL_PROPERTY);
-    if (!StringUtil.isEmptyOrSpaces(fetchUrl)) {
-      Matcher m;
-      boolean matched = false;
-      m = sshPattern.matcher(fetchUrl);
+    Matcher m;
+    boolean matched = false;
+    m = sshPattern.matcher(fetchUrl);
+    if (m.matches()) {
+      result = getSuggestionMap(m.group(1), m.group(2));
+      matched = true;
+    }
+    if (!matched) {
+      m = httpsPattern.matcher(fetchUrl);
       if (m.matches()) {
-        result = getSuggestionMap(instance, m.group(1), m.group(2));
+        result = getSuggestionMap(m.group(1), m.group(2));
         matched = true;
       }
-      if (!matched) {
-        m = httpsPattern.matcher(fetchUrl);
-        if (m.matches()) {
-          result = getSuggestionMap(instance, m.group(1), m.group(2));
-          matched = true;
-        }
-      }
-      if (!matched) {
-        m = httpsPatternNoGit.matcher(fetchUrl);
-        if (m.matches()) {
-          result = getSuggestionMap(instance, m.group(1), m.group(2));
-        }
+    }
+    if (!matched) {
+      m = httpsPatternNoGit.matcher(fetchUrl);
+      if (m.matches()) {
+        result = getSuggestionMap(m.group(1), m.group(2));
       }
     }
     if (result != null) {
@@ -116,11 +131,9 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
   }
 
   @NotNull
-  private Map<String, Object> getSuggestionMap(@NotNull final VcsRootInstance instance,
-                                               @NotNull final String owner,
+  private Map<String, Object> getSuggestionMap(@NotNull final String owner,
                                                @NotNull final String repo) {
     final Map<String, Object> result = new HashMap<>();
-    result.put("vcsRoot", instance);
     result.put("type", myType.getType());
     result.put("suggestedName", owner + "/" + repo);
     result.put("repoUrl", getRepoUrl(owner, repo));
