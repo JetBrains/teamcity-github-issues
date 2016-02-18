@@ -8,6 +8,7 @@ import jetbrains.buildServer.serverSide.BuildTypeSettings;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.healthStatus.ProjectSuggestedItem;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.vcs.VcsRoot;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
@@ -36,10 +37,7 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
   private static final Pattern sshPattern = Pattern.compile("git@github\\.com:(.+)/(.+)(?:\\.git)");
 
   /* Matches github http and https urls of format https://github.com/owner/repo.git */
-  private static final Pattern httpsPattern = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)(?:\\.git)$");
-
-  /* Matches github http and https urls of format https://github.com/owner/repo.git */
-  private static final Pattern httpsPatternNoGit = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)(?:\\.git)?$");
+  private static final Pattern httpsPattern = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)$");
 
   @NotNull
   private final String myViewUrl;
@@ -114,14 +112,7 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
     if (!matched) {
       m = httpsPattern.matcher(fetchUrl);
       if (m.matches()) {
-        result = getSuggestionMap(m.group(1), m.group(2));
-        matched = true;
-      }
-    }
-    if (!matched) {
-      m = httpsPatternNoGit.matcher(fetchUrl);
-      if (m.matches()) {
-        result = getSuggestionMap(m.group(1), m.group(2));
+        result = getSuggestionMap(m.group(1), StringUtil.removeSuffix(m.group(2), ".git", true));
       }
     }
     if (result != null) {
