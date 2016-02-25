@@ -5,7 +5,6 @@
        default-autowire="constructor">
   <bean class="jetbrains.buildServer.issueTracker.github.GitHubIssueProviderType"/>
   <bean class="jetbrains.buildServer.issueTracker.github.GitHubIssueFetcher"/>
-  <bean class="jetbrains.buildServer.issueTracker.github.GitHubIssueProvider"/>
   <bean class="jetbrains.buildServer.issueTracker.github.GitHubIssueProviderFactory"/>
   <bean class="jetbrains.buildServer.issueTracker.github.health.IssueTrackerSuggestion"/>
 </beans>
