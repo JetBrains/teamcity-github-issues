@@ -11,8 +11,8 @@
   <properties>
       <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
       <teamcity.TeamCity.GitHubIssues.plugin.version>snapshot-${maven.build.timestamp}</teamcity.TeamCity.GitHubIssues.plugin.version>
-      <teamcity.TeamCity.GitHubIssues.plugin.vendorName>Plugin vendor name</teamcity.TeamCity.GitHubIssues.plugin.vendorName>
-      <teamcity.TeamCity.GitHubIssues.plugin.vendorUrl>Plugin vendor URL</teamcity.TeamCity.GitHubIssues.plugin.vendorUrl>
+      <teamcity.TeamCity.GitHubIssues.plugin.vendorName>JetBrains, s.r.o</teamcity.TeamCity.GitHubIssues.plugin.vendorName>
+      <teamcity.TeamCity.GitHubIssues.plugin.vendorUrl>http://www.jetbrains.com</teamcity.TeamCity.GitHubIssues.plugin.vendorUrl>
   </properties>
   <dependencies>
       <dependency>
