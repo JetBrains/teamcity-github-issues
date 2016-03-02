@@ -30,7 +30,7 @@ public class SimpleTest {
     System.out.println(repo.getHtmlUrl());
   }
 
-  @Test
+  @Test(enabled = false)
   public void testConnect_Anonymous() throws Exception {
     final GitHubClient gh = getAnonymousGitHub();
     queryGitHub(gh);
@@ -52,9 +52,8 @@ public class SimpleTest {
     return client;
   }
 
-  @Test
+  @Test(enabled = false)
   public void testGetAllOpenIssues() throws Exception {
-
     final GitHubClient gh = getAnonymousGitHub();
     final List<Issue> issues = new IssueService(gh).getIssues("JetBrains", "TeamCity.SharedResources", new HashMap<String, String>() {{
       put(IssueService.FILTER_STATE, IssueService.STATE_OPEN);
