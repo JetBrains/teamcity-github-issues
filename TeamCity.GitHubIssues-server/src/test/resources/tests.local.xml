@@ -1,0 +1,15 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="TeamCity.GitHubIssues Local Suite">
+  <test name="Unit Tests">
+    <classes>
+      <class name="jetbrains.buildServer.issueTracker.github.GitHubAuthenticatorTest"/>
+      <class name="jetbrains.buildServer.issueTracker.github.SuggestionsTest"/>
+    </classes>
+  </test>
+  <test name="GitHub Integration Tests">
+    <classes>
+      <class name="jetbrains.buildServer.issueTracker.github.GitHubClientTest"/>
+      <class name="jetbrains.buildServer.issueTracker.github.GitHubIssueFetcherTest"/>
+    </classes>
+  </test>
+</suite>
