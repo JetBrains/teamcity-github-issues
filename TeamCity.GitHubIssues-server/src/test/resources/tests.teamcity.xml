@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="TeamCity.GitHubIssues CI Suite">
+  <test name="Unit Tests">
+    <classes>
+      <class name="jetbrains.buildServer.issueTracker.github.GitHubAuthenticatorTest"/>
+      <class name="jetbrains.buildServer.issueTracker.github.SuggestionsTest"/>
+    </classes>
+  </test>
+</suite>
