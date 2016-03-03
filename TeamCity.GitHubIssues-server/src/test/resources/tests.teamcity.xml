@@ -4,6 +4,7 @@
     <classes>
       <class name="jetbrains.buildServer.issueTracker.github.GitHubAuthenticatorTest"/>
       <class name="jetbrains.buildServer.issueTracker.github.SuggestionsTest"/>
+      <class name="jetbrains.buildServer.issueTracker.github.GitHubIssueProviderTest"/>
     </classes>
   </test>
 </suite>

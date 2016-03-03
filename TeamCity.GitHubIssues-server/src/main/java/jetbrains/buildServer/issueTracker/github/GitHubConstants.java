@@ -1,5 +1,7 @@
 package jetbrains.buildServer.issueTracker.github;
 
+import java.util.regex.Pattern;
+
 /**
  * Created with IntelliJ IDEA.
  *
@@ -17,4 +19,5 @@ public interface GitHubConstants {
   String AUTH_ANONYMOUS = "anonymous";
   String AUTH_LOGINPASSWORD = "loginpassword";
   String AUTH_ACCESSTOKEN = "accesstoken";
+  Pattern OWNER_AND_REPO_PATTERN = Pattern.compile("/?([^/]+)/([^/]+)/?$");
 }

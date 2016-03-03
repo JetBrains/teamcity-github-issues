@@ -27,24 +27,22 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
   private static final Logger LOG = Logger.getLogger(GitHubIssueFetcher.class.getName());
 
-  private final Pattern ownerAndRepoPattern = Pattern.compile("/?([^/]+)/([^/]+)/?$");
-
   public GitHubIssueFetcher(@NotNull final EhCacheHelper helper) {
     super(helper);
   }
 
   @NotNull
-  public IssueData getIssue(@NotNull String host, // for guthub related it is a myRepo url
-                            @NotNull String id,
+  public IssueData getIssue(@NotNull String host, // repository url
+                            @NotNull String id,   // issue id
                             @Nullable Credentials credentials) throws Exception {
     final String issueURL = getUrl(host, id);
     final String issueId = getIssueId(id);
     URL url;
     try {
       url = new URL(host);
-      final Matcher m = ownerAndRepoPattern.matcher(url.getPath());
+      final Matcher m = GitHubConstants.OWNER_AND_REPO_PATTERN.matcher(url.getPath());
       if (!m.matches()) {
-        throw new IllegalArgumentException("URL + [" + url.toString() + "] does not contain myOwner and repository info");
+        throw new IllegalArgumentException("URL + [" + url.toString() + "] does not contain owner and repository info");
       }
       return getFromCacheOrFetch(issueURL, new MyFetchFunction(url, m.group(1), m.group(2), issueId, credentials));
     } catch (MalformedURLException e) {

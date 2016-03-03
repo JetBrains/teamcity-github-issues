@@ -57,10 +57,11 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
   }
 
   @Override
-  public void setProperties(@NotNull Map<String, String> map) {
-    super.setProperties(map);
-    myHost = map.get(PARAM_REPOSITORY);
+  public void setProperties(@NotNull Map<String, String> properties) {
+    super.setProperties(properties);
+    myHost = getHostProperty(properties);
     myFetchHost = myHost;
+    myProperties.put("host", myHost);
     patchPropertiesWithToken();
   }
 
@@ -114,7 +115,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
       }
 
       if (checkNotEmptyParam(result, map, PARAM_REPOSITORY, "Repository must be specified")) {
-        String repo = map.get(PARAM_REPOSITORY);
+        String repo = getHostProperty(map);
         try {
           new URL(repo);
         } catch (MalformedURLException e) {
@@ -136,6 +137,15 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
       return true;
     }
   };
+
+  private static String getHostProperty(@NotNull final Map<String, String> properties) {
+    String result = properties.get(PARAM_REPOSITORY);
+    final Matcher matcher = OWNER_AND_REPO_PATTERN.matcher(result);
+    if (matcher.matches()) {
+      result = "https://github.com/" + matcher.group(1) + "/" + matcher.group(2);
+    }
+    return result;
+  }
 
   /**
    * Replaces token 'coordinates with actual token'
