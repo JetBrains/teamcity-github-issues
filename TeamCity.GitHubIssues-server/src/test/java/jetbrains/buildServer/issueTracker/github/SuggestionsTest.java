@@ -72,7 +72,7 @@ public class SuggestionsTest extends BaseTestCase {
   @Test
   public void testNoVcsRoots() throws Exception {
     m.checking(new Expectations() {{
-      oneOf(myManager).getProviders(myProject);
+      oneOf(myManager).getOwnProviders(myProject);
       will(returnValue(Collections.emptyMap()));
 
       oneOf(myBuildType).getVcsRoots();
@@ -88,7 +88,7 @@ public class SuggestionsTest extends BaseTestCase {
     final String id = "providerId123";
     final IssueProviderEx provider = m.mock(IssueProviderEx.class, "existing GitHub");
     m.checking(new Expectations() {{
-      oneOf(myManager).getProviders(myProject);
+      oneOf(myManager).getOwnProviders(myProject);
       will(returnValue(Collections.singletonMap(id, provider)));
 
       oneOf(provider).getType();
@@ -103,7 +103,7 @@ public class SuggestionsTest extends BaseTestCase {
     final String id = "providerId123";
     final IssueProviderEx provider = m.mock(IssueProviderEx.class, "other than GitHub");
     m.checking(new Expectations() {{
-      oneOf(myManager).getProviders(myProject);
+      oneOf(myManager).getOwnProviders(myProject);
       will(returnValue(Collections.singletonMap(id, provider)));
 
       oneOf(provider).getType();
@@ -164,7 +164,7 @@ public class SuggestionsTest extends BaseTestCase {
     final VcsRootInstance instance2 = m.mock(VcsRootInstance.class, "real-instance-2");
 
     m.checking(new Expectations() {{
-      oneOf(myManager).getProviders(myProject);
+      oneOf(myManager).getOwnProviders(myProject);
       will(returnValue(Collections.emptyMap()));
 
       oneOf(myBuildType).getVcsRoots();
@@ -198,7 +198,7 @@ public class SuggestionsTest extends BaseTestCase {
   private void testSingleUrl(final String sourceUrl, String expectedUrl) {
     final VcsRoot root = m.mock(VcsRoot.class);
     m.checking(new Expectations() {{
-      oneOf(myManager).getProviders(myProject);
+      oneOf(myManager).getOwnProviders(myProject);
       will(returnValue(Collections.emptyMap()));
 
       oneOf(myBuildType).getVcsRoots();
