@@ -62,7 +62,7 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
   @Override
   public List<ProjectSuggestedItem> getSuggestions(@NotNull final SProject project) {
     final String type = myType.getType();
-    boolean alreadyUsed = myIssueProvidersManager.getOwnProviders(project).values().stream().anyMatch(it -> it.getType().equals(type));
+    boolean alreadyUsed = myIssueProvidersManager.getProviders(project).stream().anyMatch(it -> it.getType().equals(type));
     final List<ProjectSuggestedItem> result = new ArrayList<>();
     if (!alreadyUsed) {
       final List<SBuildType> buildTypes = project.getOwnBuildTypes();
@@ -70,13 +70,15 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
       if (paths.stream().anyMatch(ReferencesResolverUtil::mayContainReference)) {
         paths = getPathsFromInstances(buildTypes);
       }
-      final Map<String, Map<String, Object>> results = new HashMap<>();
-      paths.stream()
-              .map(this::toSuggestion)
-              .filter(Objects::nonNull)
-              .forEach(p -> results.put(p.first, p.second));
-      if (!results.isEmpty()) {
-        result.add(new ProjectSuggestedItem(getType(), project, Collections.singletonMap("suggestedTrackers", results)));
+      if (!paths.isEmpty()) {
+        final Map<String, Map<String, Object>> results = new HashMap<>();
+        paths.stream()
+                .map(this::toSuggestion)
+                .filter(Objects::nonNull)
+                .forEach(p -> results.put(p.first, p.second));
+        if (!results.isEmpty()) {
+          result.add(new ProjectSuggestedItem(getType(), project, Collections.singletonMap("suggestedTrackers", results)));
+        }
       }
     }
     return result;
