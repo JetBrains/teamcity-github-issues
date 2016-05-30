@@ -72,8 +72,8 @@ public class SuggestionsTest extends BaseTestCase {
   @Test
   public void testNoVcsRoots() throws Exception {
     m.checking(new Expectations() {{
-      oneOf(myManager).getOwnProviders(myProject);
-      will(returnValue(Collections.emptyMap()));
+      oneOf(myManager).getProviders(myProject);
+      will(returnValue(Collections.emptyList()));
 
       oneOf(myBuildType).getVcsRoots();
       will(returnValue(Collections.emptyList()));
@@ -85,11 +85,10 @@ public class SuggestionsTest extends BaseTestCase {
   @Test
   @TestFor(issues = "TW-43781")
   public void testAlreadyUsed() throws Exception {
-    final String id = "providerId123";
     final IssueProviderEx provider = m.mock(IssueProviderEx.class, "existing GitHub");
     m.checking(new Expectations() {{
-      oneOf(myManager).getOwnProviders(myProject);
-      will(returnValue(Collections.singletonMap(id, provider)));
+      oneOf(myManager).getProviders(myProject);
+      will(returnValue(Collections.singletonList(provider)));
 
       oneOf(provider).getType();
       will(returnValue(myType.getType()));
@@ -100,11 +99,10 @@ public class SuggestionsTest extends BaseTestCase {
 
   @Test
   public void testNoGitHub() throws Exception {
-    final String id = "providerId123";
     final IssueProviderEx provider = m.mock(IssueProviderEx.class, "other than GitHub");
     m.checking(new Expectations() {{
-      oneOf(myManager).getOwnProviders(myProject);
-      will(returnValue(Collections.singletonMap(id, provider)));
+      oneOf(myManager).getProviders(myProject);
+      will(returnValue(Collections.singletonList(provider)));
 
       oneOf(provider).getType();
       will(returnValue("some other type"));
@@ -164,8 +162,8 @@ public class SuggestionsTest extends BaseTestCase {
     final VcsRootInstance instance2 = m.mock(VcsRootInstance.class, "real-instance-2");
 
     m.checking(new Expectations() {{
-      oneOf(myManager).getOwnProviders(myProject);
-      will(returnValue(Collections.emptyMap()));
+      oneOf(myManager).getProviders(myProject);
+      will(returnValue(Collections.emptyList()));
 
       oneOf(myBuildType).getVcsRoots();
       will(returnValue(Collections.singletonList(vcsRoot)));
@@ -198,8 +196,8 @@ public class SuggestionsTest extends BaseTestCase {
   private void testSingleUrl(final String sourceUrl, String expectedUrl) {
     final VcsRoot root = m.mock(VcsRoot.class);
     m.checking(new Expectations() {{
-      oneOf(myManager).getOwnProviders(myProject);
-      will(returnValue(Collections.emptyMap()));
+      oneOf(myManager).getProviders(myProject);
+      will(returnValue(Collections.emptyList()));
 
       oneOf(myBuildType).getVcsRoots();
       will(returnValue(Collections.singletonList(root)));
@@ -221,9 +219,8 @@ public class SuggestionsTest extends BaseTestCase {
       assertNotNull(data);
       final Map<String, Map<String, Object>> suggestedTrackers = (Map<String, Map<String, Object>>) data.get("suggestedTrackers");
       assertNotNull(suggestedTrackers);
-      assertEquals(expected.length, suggestedTrackers.size());
       assertContains(suggestedTrackers.keySet(), expected);
-      for (String key : expected) {
+      for (String key: expected) {
         Map<String, Object> value = suggestedTrackers.get(key);
         assertNotNull(value);
         assertEquals(key, value.get("repoUrl"));
