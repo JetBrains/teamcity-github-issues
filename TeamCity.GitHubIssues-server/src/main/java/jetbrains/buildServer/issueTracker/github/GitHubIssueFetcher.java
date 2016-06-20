@@ -1,22 +1,22 @@
 package jetbrains.buildServer.issueTracker.github;
 
+import com.intellij.openapi.diagnostic.Logger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jetbrains.buildServer.issueTracker.AbstractIssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueData;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
+import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.util.cache.EhCacheHelper;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.log4j.Logger;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.IssueService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
-  private static final Logger LOG = Logger.getLogger(GitHubIssueFetcher.class.getName());
+  private static final Logger LOG = Loggers.ISSUE_TRACKERS;
 
   public GitHubIssueFetcher(@NotNull final EhCacheHelper helper) {
     super(helper);
