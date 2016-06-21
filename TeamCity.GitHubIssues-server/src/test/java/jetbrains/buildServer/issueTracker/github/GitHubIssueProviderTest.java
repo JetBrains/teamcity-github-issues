@@ -1,8 +1,11 @@
 package jetbrains.buildServer.issueTracker.github;
 
+import java.util.HashMap;
+import java.util.Map;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.UserModel;
+import jetbrains.buildServer.util.TestFor;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
@@ -11,9 +14,6 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -70,6 +70,14 @@ public class GitHubIssueProviderTest extends BaseTestCase {
   @Test
   public void testValidate_3rdPartyProvider_Valid() throws Exception {
     assertEmpty(myProvider.getPropertiesProcessor().process(getProperties("repo/owner")));
+  }
+
+  @Test
+  @TestFor(issues = "TW-45803")
+  public void testValidate_3rdPartyProvider_NoAuthType() throws Exception {
+    final Map<String, String> properties = getProperties("repo/owner");
+    properties.remove(GitHubConstants.PARAM_AUTH_TYPE);
+    assertEmpty(myProvider.getPropertiesProcessor().process(properties));
   }
 
   @Test

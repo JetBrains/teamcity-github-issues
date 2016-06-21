@@ -94,16 +94,19 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
     public Collection<InvalidProperty> process(Map<String, String> map) {
       final List<InvalidProperty> result = new ArrayList<>();
 
-      if (checkNotEmptyParam(result, map, PARAM_AUTH_TYPE, "Authentication type must be specified")) {
-        // we have auth type. check against it
-        final String authTypeParam = map.get(PARAM_AUTH_TYPE);
-        if (authTypeParam.equals(AUTH_LOGINPASSWORD)) {
-          checkNotEmptyParam(result, map, PARAM_USERNAME, "Username must be specified");
-          checkNotEmptyParam(result, map, PARAM_PASSWORD, "Password must be specified");
-        } else if (authTypeParam.equals(AUTH_ACCESSTOKEN)) {
-          checkNotEmptyParam(result, map, PARAM_ACCESS_TOKEN, "Access token must be specified");
-        }
+      // authTokenType -
+      String authTypeParam = map.get(PARAM_AUTH_TYPE);
+      if (isEmptyOrSpaces(authTypeParam)) {
+        authTypeParam = AUTH_ANONYMOUS;
       }
+      // we have auth type. check against it
+      if (authTypeParam.equals(AUTH_LOGINPASSWORD)) {
+        checkNotEmptyParam(result, map, PARAM_USERNAME, "Username must be specified");
+        checkNotEmptyParam(result, map, PARAM_PASSWORD, "Password must be specified");
+      } else if (authTypeParam.equals(AUTH_ACCESSTOKEN)) {
+        checkNotEmptyParam(result, map, PARAM_ACCESS_TOKEN, "Access token must be specified");
+      }
+
       if (checkNotEmptyParam(result, map, PARAM_PATTERN, "Issue pattern must not be empty")) {
         try {
           String patternString = map.get(PARAM_PATTERN);

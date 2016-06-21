@@ -1,15 +1,15 @@
 package jetbrains.buildServer.issueTracker.github;
 
+import java.util.HashMap;
+import java.util.Map;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
+import jetbrains.buildServer.util.TestFor;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Oleg Rybak <oleg.rybak@jetbrains.com>
@@ -28,6 +28,13 @@ public class GitHubAuthenticatorTest extends BaseTestCase {
   @Test
   public void testAnonymous() throws Exception {
     myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_ANONYMOUS);
+    final Credentials result = getCredentials();
+    assertNull(result);
+  }
+
+  @Test
+  @TestFor(issues = "TW-45803")
+  public void testEmpty_Anonymous_OldPluginCompatible() throws Exception {
     final Credentials result = getCredentials();
     assertNull(result);
   }
