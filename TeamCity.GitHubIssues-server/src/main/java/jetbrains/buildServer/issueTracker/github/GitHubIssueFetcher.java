@@ -9,7 +9,7 @@ import jetbrains.buildServer.issueTracker.AbstractIssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueData;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
 import jetbrains.buildServer.log.Loggers;
-import jetbrains.buildServer.util.cache.EhCacheHelper;
+import jetbrains.buildServer.util.cache.EhCacheUtil;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.eclipse.egit.github.core.Issue;
@@ -27,8 +27,8 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
   private static final Logger LOG = Loggers.ISSUE_TRACKERS;
 
-  public GitHubIssueFetcher(@NotNull final EhCacheHelper helper) {
-    super(helper);
+  public GitHubIssueFetcher(@NotNull EhCacheUtil cacheUtil) {
+    super(cacheUtil);
   }
 
   @NotNull
