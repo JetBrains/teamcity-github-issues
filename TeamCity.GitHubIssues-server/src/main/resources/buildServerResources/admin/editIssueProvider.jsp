@@ -44,14 +44,14 @@
       </tr>
     </c:if>
     <tr>
-      <th><label for="${name}" class="shortLabel">Display Name: <l:star/></label></th>
+      <th><label for="${name}" class="shortLabel">Display Name:<l:star/></label></th>
       <td>
         <props:textProperty name="${name}" maxlength="100"/>
         <span id="error_${name}" class="error"></span>
       </td>
     </tr>
     <tr>
-      <th><label for="${repository}" class="shortLabel">Repository URL: <l:star/></label></th>
+      <th><label for="${repository}" class="shortLabel">Repository URL:<l:star/></label></th>
       <td>
         <props:textProperty name="${repository}" maxlength="100"/>
         <jsp:include page="/admin/repositoryControls.html?projectId=${project.externalId}&pluginName=github"/>
@@ -72,14 +72,14 @@
       </td>
     </tr>
     <tr class="js_authsetting ${authLoginPassword}">
-      <th><label for="${username}" class="shortLabel">Username: <l:star/></label></th>
+      <th><label for="${username}" class="shortLabel">Username:<l:star/></label></th>
       <td>
         <props:textProperty name="${username}" maxlength="100"/>
         <span id="error_${username}" class="error"></span>
       </td>
     </tr>
     <tr class="js_authsetting ${authLoginPassword}">
-      <th><label for="${password}" class="shortLabel">Password: <l:star/></label></th>
+      <th><label for="${password}" class="shortLabel">Password:<l:star/></label></th>
       <td>
         <props:passwordProperty name="${password}" maxlength="100"/>
         <span id="error_${password}" class="error"></span>
@@ -87,7 +87,7 @@
     </tr>
 
     <tr class="js_authsetting ${authAccessToken}">
-      <th><label for="${accessToken}" class="shortLabel">Access token: <l:star/></label></th>
+      <th><label for="${accessToken}" class="shortLabel">Access token:<l:star/></label></th>
       <td>
         <props:passwordProperty name="${accessToken}" maxlength="100"/>
         <span class="fieldExplanation">GitHub <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/"> access token</a></span>
@@ -95,7 +95,7 @@
       </td>
     </tr>
     <tr>
-      <th><label for="${pattern}" class="shortLabel">Issue ID Pattern: <l:star/></label></th>
+      <th><label for="${pattern}" class="shortLabel">Issue ID Pattern:<l:star/></label></th>
       <td>
         <props:textProperty name="${pattern}" maxlength="100"/>
         <span class="fieldExplanation">Use the regex syntax, e.g. #(\d+)<bs:help file="Integrating+TeamCity+with+Issue+Tracker"/></span>
