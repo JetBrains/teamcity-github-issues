@@ -27,7 +27,7 @@ public class GitHubIssueFetcherTest extends BaseTestCase {
                                                     EventDispatcher.create(BuildServerListener.class),
                                                     new ResetCacheRegisterImpl());
 
-    myFetcher = new GitHubIssueFetcher(cacheUtil);
+    myFetcher = new GitHubIssueFetcher(cacheUtil, () -> null);
     myFetcher.setPattern(Pattern.compile("#(\\d+)"));
   }
 

@@ -3,13 +3,16 @@ package jetbrains.buildServer.issueTracker.github;
 import com.intellij.openapi.diagnostic.Logger;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyStore;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import jetbrains.buildServer.issueTracker.AbstractIssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueData;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
 import jetbrains.buildServer.log.Loggers;
+import jetbrains.buildServer.serverSide.oauth.github.GitHubClientSSL;
 import jetbrains.buildServer.util.cache.EhCacheUtil;
+import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.eclipse.egit.github.core.Issue;
@@ -26,9 +29,13 @@ import org.jetbrains.annotations.Nullable;
 public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
   private static final Logger LOG = Loggers.ISSUE_TRACKERS;
+  private SSLTrustStoreProvider mySslTrustStoreProvider;
 
-  public GitHubIssueFetcher(@NotNull EhCacheUtil cacheUtil) {
+  public GitHubIssueFetcher(
+    @NotNull EhCacheUtil cacheUtil,
+    @NotNull final SSLTrustStoreProvider sslTrustStoreProvider) {
     super(cacheUtil);
+    mySslTrustStoreProvider = sslTrustStoreProvider;
   }
 
   @NotNull
@@ -44,7 +51,8 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
       if (!m.matches()) {
         throw new IllegalArgumentException("URL + [" + url.toString() + "] does not contain owner and repository info");
       }
-      return getFromCacheOrFetch(issueURL, new MyFetchFunction(url, m.group(1), m.group(2), issueId, credentials));
+      return getFromCacheOrFetch(issueURL, new MyFetchFunction(url, m.group(1), m.group(2), issueId, credentials,
+                                                               mySslTrustStoreProvider.getTrustStore()));
     } catch (MalformedURLException e) {
       LOG.warn(e);
       throw new RuntimeException(e);
@@ -88,25 +96,31 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
     @Nullable
     private final Credentials myCredentials;
 
+    @Nullable
+    private final KeyStore myTrustStore;
+
     public MyFetchFunction(@NotNull final URL url,
                            @NotNull final String owner,
                            @NotNull final String repo,
                            @NotNull final String id,
-                           @Nullable final Credentials credentials) {
+                           @Nullable final Credentials credentials,
+                           @Nullable final KeyStore trustStore) {
       myURL = url;
       myOwner = owner;
       myRepo = repo;
       myId = id;
       myCredentials = credentials;
+      myTrustStore = trustStore;
     }
 
     @NotNull
     public IssueData fetch() throws Exception {
-      GitHubClient client;
+      GitHubClientSSL client;
       if ("github.com".equals(myURL.getHost())) {
-        client = new GitHubClient();
+        client = new GitHubClientSSL();
       } else {
-        client = new GitHubClient(myURL.getHost(), myURL.getPort(), myURL.getProtocol());
+        client = new GitHubClientSSL(myURL.getHost(), myURL.getPort(), myURL.getProtocol());
+        client.setTrustStore(myTrustStore);
       }
       if (myCredentials == null) {
         if (LOG.isDebugEnabled()) {
