@@ -16,7 +16,6 @@ import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.eclipse.egit.github.core.Issue;
-import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.IssueService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -115,13 +114,8 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
     @NotNull
     public IssueData fetch() throws Exception {
-      GitHubClientSSL client;
-      if ("github.com".equals(myURL.getHost())) {
-        client = new GitHubClientSSL();
-      } else {
-        client = new GitHubClientSSL(myURL.getHost(), myURL.getPort(), myURL.getProtocol());
-        client.setTrustStore(myTrustStore);
-      }
+      GitHubClientSSL client = new GitHubClientSSL(myURL.getHost(), myURL.getPort(), myURL.getProtocol());
+      client.setTrustStore(myTrustStore);
       if (myCredentials == null) {
         if (LOG.isDebugEnabled()) {
           LOG.debug("Connecting to " + myURL.toString() + "anonymously");
