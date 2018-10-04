@@ -1,11 +1,6 @@
 package jetbrains.buildServer.issueTracker.github;
 
 import com.intellij.openapi.diagnostic.Logger;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyStore;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import jetbrains.buildServer.issueTracker.AbstractIssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueData;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
@@ -19,6 +14,12 @@ import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.service.IssueService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.KeyStore;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,7 +37,6 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
     super(cacheUtil);
     mySslTrustStoreProvider = sslTrustStoreProvider;
   }
-
   @NotNull
   public IssueData getIssue(@NotNull String host, // repository url
                             @NotNull String id,   // issue id
@@ -114,7 +114,12 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
     @NotNull
     public IssueData fetch() throws Exception {
-      GitHubClientSSL client = new GitHubClientSSL(myURL.getHost(), myURL.getPort(), myURL.getProtocol());
+      GitHubClientSSL client;
+      if ("github.com".equals(myURL.getHost())) {
+        client = new GitHubClientSSL();
+      } else {
+        client = new GitHubClientSSL(myURL.getHost(), myURL.getPort(), myURL.getProtocol());
+      }
       client.setTrustStore(myTrustStore);
       if (myCredentials == null) {
         if (LOG.isDebugEnabled()) {
