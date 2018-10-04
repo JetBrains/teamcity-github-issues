@@ -7,7 +7,7 @@
   <packaging>pom</packaging>
     <url>http://jetbrains.com</url>
   <properties>
-    <teamcity-version>2017.1</teamcity-version>
+    <teamcity-version>2018.1</teamcity-version>
   </properties>
   <repositories>
     <repository>
