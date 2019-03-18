@@ -1,7 +1,9 @@
 package jetbrains.buildServer.issueTracker.github.auth;
 
 import com.intellij.openapi.util.text.StringUtil;
+import jetbrains.buildServer.issueTracker.BasicIssueFetcherAuthenticator;
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
+import jetbrains.buildServer.util.HTTPRequestBuilder;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -40,6 +42,10 @@ public class GitHubAuthenticator implements IssueFetcherAuthenticator {
   }
 
   public void applyAuthScheme(@NotNull final HttpMethod httpMethod) {
+  }
+
+  @Override
+  public void applyAuthScheme(@NotNull final HTTPRequestBuilder requestBuilder) {
   }
 
   @Nullable
