@@ -23,7 +23,7 @@
   <packaging>pom</packaging>
     <url>https://jetbrains.com</url>
   <properties>
-    <teamcity-version>2019.1</teamcity-version>
+    <teamcity-version>2020.1</teamcity-version>
   </properties>
   <repositories>
     <repository>

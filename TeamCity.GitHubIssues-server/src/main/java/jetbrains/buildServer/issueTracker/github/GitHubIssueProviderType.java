@@ -32,6 +32,8 @@ import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
  */
 public class GitHubIssueProviderType extends IssueProviderType {
 
+  public static final String TYPE = "GithubIssues";
+
   @NotNull
   private final String myConfigUrl;
 
@@ -49,7 +51,7 @@ public class GitHubIssueProviderType extends IssueProviderType {
   @NotNull
   @Override
   public String getType() {
-    return "GithubIssues"; // must be 'GithubIssues' to handle existing github integration
+    return TYPE; // must be 'GithubIssues' to handle existing github integration
   }
 
   @NotNull

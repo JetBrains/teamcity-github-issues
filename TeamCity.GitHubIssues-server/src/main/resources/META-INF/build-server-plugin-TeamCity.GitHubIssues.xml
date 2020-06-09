@@ -23,4 +23,5 @@
   <bean class="jetbrains.buildServer.issueTracker.github.GitHubIssueFetcher"/>
   <bean class="jetbrains.buildServer.issueTracker.github.GitHubIssueProviderFactory"/>
   <bean class="jetbrains.buildServer.issueTracker.github.health.IssueTrackerSuggestion"/>
+  <bean class="jetbrains.buildServer.issueTracker.github.health.PasswordAuthReport"/>
 </beans>
