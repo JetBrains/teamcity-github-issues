@@ -31,5 +31,5 @@
 
 <c:url var="url" value="/admin/editProject.html?init=1&projectId=${project.externalId}&tab=issueTrackers&#${hash}"/>
 
-Github issue tracker <a href="${url}"><bs:out value="${name}"/></a> uses deprecated login/password authentication.
+Github issue tracker <a href="${url}"><bs:out value="${name}"/></a> uses deprecated username/password authentication.
 Consider using access token instead

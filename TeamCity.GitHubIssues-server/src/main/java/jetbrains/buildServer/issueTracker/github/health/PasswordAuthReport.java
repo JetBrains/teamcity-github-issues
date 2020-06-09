@@ -40,7 +40,7 @@ public class PasswordAuthReport extends HealthStatusReport {
 
     private static final ItemCategory GITHUB_PASS_AUTH_CATEGORY =
             new ItemCategory("githubPassAuth",
-                    "GitHub issue tracker connection uses login/password authentication",
+                    "GitHub issue tracker connection uses username/password authentication",
                     ItemSeverity.WARN);
 
     public static final String REPORT_TYPE = "GitHubPasswordAuthentication";

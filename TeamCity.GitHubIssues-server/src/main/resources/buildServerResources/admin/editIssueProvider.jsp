@@ -81,10 +81,13 @@
                               id="${authType}_select"
                               onchange="BS.GitHubIssues.selectAuthType();">
           <props:option value="${authAnonymous}">Anonymous</props:option>
-          <props:option value="${authLoginPassword}">Username / Password</props:option>
           <props:option value="${authAccessToken}">Access Token</props:option>
+          <props:option value="${authLoginPassword}">Username / Password</props:option>
         </props:selectProperty>
         <span id="error_${authType}" class="error"></span>
+        <div class="js_authsetting ${authLoginPassword} attentionComment">
+          Username / password authentication has been deprecated. Consider using access token instead
+        </div>
       </td>
     </tr>
     <tr class="js_authsetting ${authLoginPassword}">
