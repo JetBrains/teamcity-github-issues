@@ -19,8 +19,10 @@ package jetbrains.buildServer.issueTracker.github;
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.issueTracker.AbstractIssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueData;
+import jetbrains.buildServer.issueTracker.errors.NotFoundException;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
 import jetbrains.buildServer.log.Loggers;
+import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.oauth.github.GitHubClientSSL;
 import jetbrains.buildServer.util.cache.EhCacheUtil;
 import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider;
@@ -45,14 +47,14 @@ import java.util.regex.Pattern;
 public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
   private static final Logger LOG = Loggers.ISSUE_TRACKERS;
-  private SSLTrustStoreProvider mySslTrustStoreProvider;
+  private final SSLTrustStoreProvider mySslTrustStoreProvider;
 
-  public GitHubIssueFetcher(
-    @NotNull EhCacheUtil cacheUtil,
-    @NotNull final SSLTrustStoreProvider sslTrustStoreProvider) {
+  public GitHubIssueFetcher(@NotNull EhCacheUtil cacheUtil,
+                            @NotNull final SSLTrustStoreProvider sslTrustStoreProvider) {
     super(cacheUtil);
     mySslTrustStoreProvider = sslTrustStoreProvider;
   }
+
   @NotNull
   public IssueData getIssue(@NotNull String host, // repository url
                             @NotNull String id,   // issue id
@@ -67,7 +69,7 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
         throw new IllegalArgumentException("URL + [" + url.toString() + "] does not contain owner and repository info");
       }
       return getFromCacheOrFetch(issueURL, new MyFetchFunction(url, m.group(1), m.group(2), issueId, credentials,
-                                                               mySslTrustStoreProvider.getTrustStore()));
+              mySslTrustStoreProvider.getTrustStore()));
     } catch (MalformedURLException e) {
       LOG.warn(e);
       throw new RuntimeException(e);
@@ -148,9 +150,9 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
         }
         client.setOAuth2Token(token);
       } else {
-        UsernamePasswordCredentials cr = (UsernamePasswordCredentials)myCredentials;
+        UsernamePasswordCredentials cr = (UsernamePasswordCredentials) myCredentials;
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Connecting to " + myURL.toString() +  "using username + [" + cr.getUserName() + "] and password");
+          LOG.debug("Connecting to " + myURL.toString() + "using username + [" + cr.getUserName() + "] and password");
         }
         client.setCredentials(cr.getUserName(), cr.getPassword());
       }
@@ -159,6 +161,10 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
   }
 
   private static IssueData createIssueData(final Issue issue) {
+    if (issue.getPullRequest() != null
+            && TeamCityProperties.getBooleanOrTrue("teamcity.issues.github.filter.pull.requests")) {
+      throw new NotFoundException("Issue with id " + issue.getId() + " represents a pull request and is filtered out");
+    }
     return new IssueData(Integer.toString(issue.getNumber()), issue.getTitle(), issue.getState(), issue.getHtmlUrl(), IssueService.STATE_CLOSED.equals(issue.getState()));
   }
 }
