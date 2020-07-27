@@ -16,9 +16,14 @@
 
 package jetbrains.buildServer.issueTracker.github;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.issueTracker.IssueProviderEx;
 import jetbrains.buildServer.issueTracker.IssueProvidersManager;
+import jetbrains.buildServer.issueTracker.github.health.HealthReportHelper;
 import jetbrains.buildServer.issueTracker.github.health.IssueTrackerSuggestion;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
@@ -35,8 +40,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
-
 /**
  * Created with IntelliJ IDEA.
  *
@@ -52,6 +55,8 @@ public class SuggestionsTest extends BaseTestCase {
   private GitHubIssueProviderType myType;
   private IssueTrackerSuggestion mySuggestion;
   private SProject myProject;
+
+  private MockHelper myHelper;
 
   @Override
   @BeforeMethod
@@ -75,7 +80,9 @@ public class SuggestionsTest extends BaseTestCase {
 
     }});
     myType = new GitHubIssueProviderType(myPluginDescriptor);
-    mySuggestion = new IssueTrackerSuggestion(myPluginDescriptor, myPagePlaces, myManager, myType);
+    myHelper = new MockHelper();
+    mySuggestion = new IssueTrackerSuggestion(myPluginDescriptor, myPagePlaces, myManager, myType, myHelper);
+    myHelper.setExpectedResult(true);
   }
 
   @Override
@@ -86,7 +93,7 @@ public class SuggestionsTest extends BaseTestCase {
   }
 
   @Test
-  public void testNoVcsRoots() throws Exception {
+  public void testNoVcsRoots() {
     m.checking(new Expectations() {{
       oneOf(myManager).getProviders(myProject);
       will(returnValue(Collections.emptyList()));
@@ -100,7 +107,7 @@ public class SuggestionsTest extends BaseTestCase {
 
   @Test
   @TestFor(issues = "TW-43781")
-  public void testAlreadyUsed() throws Exception {
+  public void testAlreadyUsed() {
     final IssueProviderEx provider = m.mock(IssueProviderEx.class, "existing GitHub");
     m.checking(new Expectations() {{
       oneOf(myManager).getProviders(myProject);
@@ -114,7 +121,7 @@ public class SuggestionsTest extends BaseTestCase {
   }
 
   @Test
-  public void testNoGitHub() throws Exception {
+  public void testNoGitHub() {
     final IssueProviderEx provider = m.mock(IssueProviderEx.class, "other than GitHub");
     m.checking(new Expectations() {{
       oneOf(myManager).getProviders(myProject);
@@ -131,42 +138,50 @@ public class SuggestionsTest extends BaseTestCase {
   }
 
   @Test
-  public void testSSH() throws Exception {
+  @TestFor(issues = "")
+  public void testNoIssues() {
+    myHelper.setExpectedResult(false);
+    final String sourceUrl = "git@github.com:JetBrains/TeamCity.GitHubIssues.git";
+    testSingleUrl(sourceUrl, null);
+  }
+
+  @Test
+  public void testSSH() {
     final String sourceUrl = "git@github.com:JetBrains/TeamCity.GitHubIssues.git";
     final String expectedUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
     testSingleUrl(sourceUrl, expectedUrl);
   }
 
   @Test
-  public void testHttp() throws Exception {
+  public void testHttp() {
     final String sourceUrl = "http://github.com/JetBrains/TeamCity.GitHubIssues.git";
     final String expectedUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
     testSingleUrl(sourceUrl, expectedUrl);
   }
 
   @Test
-  public void testHttps() throws Exception {
+  public void testHttps() {
     final String sourceUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues.git";
     final String expectedUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
     testSingleUrl(sourceUrl, expectedUrl);
   }
 
   @Test
-  public void testNoDotGitHttp() throws Exception {
+  public void testNoDotGitHttp() {
     final String sourceUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
     final String expectedUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
     testSingleUrl(sourceUrl, expectedUrl);
   }
 
   @Test
-  public void testNoDotGitHttps() throws Exception {
+  public void testNoDotGitHttps() {
     final String sourceUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
     final String expectedUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
     testSingleUrl(sourceUrl, expectedUrl);
   }
 
   @Test
-  public void testParametrizedUrl() throws Exception {
+  public void testParametrizedUrl() {
     final String sourceParametrizedUrl = "https://github.com/%project.owner%/%project.repo%";
     final String sourceUrl1 = "https://github.com/JetBrains/TeamCity.GitHubIssues";
     final String sourceUrl2 = "https://github.com/orybak/TeamCity.GitHubIssues";
@@ -208,7 +223,7 @@ public class SuggestionsTest extends BaseTestCase {
     checkSuggestions(mySuggestion.getSuggestions(myProject), expectedUrl1, expectedUrl2);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("SameParameterValue")
   private void testSingleUrl(final String sourceUrl, String expectedUrl) {
     final VcsRoot root = m.mock(VcsRoot.class);
     m.checking(new Expectations() {{
@@ -224,7 +239,11 @@ public class SuggestionsTest extends BaseTestCase {
       oneOf(root).getProperty("url");
       will(returnValue(sourceUrl));
     }});
-    checkSuggestions(mySuggestion.getSuggestions(myProject), expectedUrl);
+    if (expectedUrl != null) {
+      checkSuggestions(mySuggestion.getSuggestions(myProject), expectedUrl);
+    } else {
+      assertEmpty(mySuggestion.getSuggestions(myProject));
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -243,6 +262,20 @@ public class SuggestionsTest extends BaseTestCase {
       }
     } else {
       assertEmpty(suggestions);
+    }
+  }
+
+  private class MockHelper extends HealthReportHelper {
+
+    private boolean myExpectedResult = true;
+
+    public void setExpectedResult(boolean expectedResult) {
+      myExpectedResult = expectedResult;
+    }
+
+    @Override
+    public boolean hasIssues(@NotNull String owner, @NotNull String repo) {
+      return myExpectedResult;
     }
   }
 }
