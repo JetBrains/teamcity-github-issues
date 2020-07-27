@@ -52,7 +52,6 @@ public class SuggestionsTest extends BaseTestCase {
   private PluginDescriptor myPluginDescriptor;
   private PagePlaces myPagePlaces;
   private IssueProvidersManager myManager;
-  private GitHubIssueProviderType myType;
   private IssueTrackerSuggestion mySuggestion;
   private SProject myProject;
 
@@ -79,9 +78,8 @@ public class SuggestionsTest extends BaseTestCase {
       will(returnValue("PROJECT_ID"));
 
     }});
-    myType = new GitHubIssueProviderType(myPluginDescriptor);
     myHelper = new MockHelper();
-    mySuggestion = new IssueTrackerSuggestion(myPluginDescriptor, myPagePlaces, myManager, myType, myHelper);
+    mySuggestion = new IssueTrackerSuggestion(myPluginDescriptor, myPagePlaces, myManager, myHelper);
     myHelper.setExpectedResult(true);
   }
 
@@ -114,7 +112,7 @@ public class SuggestionsTest extends BaseTestCase {
       will(returnValue(Collections.singletonList(provider)));
 
       oneOf(provider).getType();
-      will(returnValue(myType.getType()));
+      will(returnValue(GitHubIssueProviderType.TYPE));
 
     }});
     checkSuggestions(mySuggestion.getSuggestions(myProject));

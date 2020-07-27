@@ -61,16 +61,11 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
   @NotNull
   private final HealthReportHelper myHelper;
 
-  @NotNull
-  private final GitHubIssueProviderType myType;
-
   public IssueTrackerSuggestion(@NotNull final PluginDescriptor descriptor,
                                 @NotNull PagePlaces pagePlaces,
                                 @NotNull final IssueProvidersManager issueProvidersManager,
-                                @NotNull final GitHubIssueProviderType type,
                                 @NotNull final HealthReportHelper helper) {
     super("addGitHubIssueTracker", "Suggest to add a GitHub Issue Tracker", pagePlaces);
-    myType = type;
     myViewUrl = descriptor.getPluginResourcesPath("health/addGitHubIssueTracker.jsp");
     myIssueProvidersManager = issueProvidersManager;
     myHelper = helper;
@@ -79,8 +74,7 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
   @NotNull
   @Override
   public List<ProjectSuggestedItem> getSuggestions(@NotNull final SProject project) {
-    final String type = myType.getType();
-    boolean alreadyUsed = myIssueProvidersManager.getProviders(project).stream().anyMatch(it -> it.getType().equals(type));
+    boolean alreadyUsed = myIssueProvidersManager.getProviders(project).stream().anyMatch(it -> it.getType().equals(GitHubIssueProviderType.TYPE));
     final List<ProjectSuggestedItem> result = new ArrayList<>();
     if (!alreadyUsed) {
       final List<SBuildType> buildTypes = project.getOwnBuildTypes();
@@ -149,7 +143,7 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
   private Map<String, Object> getSuggestionMap(@NotNull final String owner,
                                                @NotNull final String repo) {
     final Map<String, Object> result = new HashMap<>();
-    result.put("type", myType.getType());
+    result.put("type", GitHubIssueProviderType.TYPE);
     result.put("suggestedName", owner + "/" + repo);
     result.put("repoUrl", getRepoUrl(owner, repo));
     return result;
