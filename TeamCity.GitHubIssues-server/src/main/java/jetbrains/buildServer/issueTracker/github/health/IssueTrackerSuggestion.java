@@ -74,7 +74,8 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
   @NotNull
   @Override
   public List<ProjectSuggestedItem> getSuggestions(@NotNull final SProject project) {
-    boolean alreadyUsed = myIssueProvidersManager.getProviders(project).stream().anyMatch(it -> it.getType().equals(GitHubIssueProviderType.TYPE));
+    boolean alreadyUsed = myIssueProvidersManager.getProviders(project).stream()
+                                                 .anyMatch(it -> it.getType().equals(GitHubIssueProviderType.TYPE));
     final List<ProjectSuggestedItem> result = new ArrayList<>();
     if (!alreadyUsed) {
       final List<SBuildType> buildTypes = project.getOwnBuildTypes();
@@ -109,7 +110,6 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
                  .filter(it -> GIT_VCS_NAME.equals(it.getVcsName()))
                  .map(it -> it.getProperty(GIT_FETCH_URL_PROPERTY))
                  .filter(Objects::nonNull)
-                 .distinct()
                  .collect(Collectors.toSet());
   }
 
