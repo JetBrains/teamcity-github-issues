@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dsl-extension kind="projectFeature" type="IssueTracker" generateDslJar="true" applicable="params['type'] == 'GithubIssues'">
+    <class name="GitHubIssueTracker">
+        <description>
+            Project feature enabling integration with GitHub issue tracker
+        </description>
+    </class>
+    <init>
+        <param name="type" value="GithubIssues" />
+        <param name="secure:accessToken" value="" />
+        <param name="username" value="" />
+        <param name="secure:password" value="" />
+    </init>
+    <function name="githubIssues">
+        <description>
+            Adds a project features enabling integration with GitHub issue tracker
+        </description>
+    </function>
+    <params>
+        <param name="name" dslName="displayName" mandatory="true">
+            <description>
+                Issue tracker integration display name.
+            </description>
+        </param>
+
+        <param name="repository" dslName="repositoryURL" mandatory="true">
+            <description>
+                GitHub server URL.
+            </description>
+        </param>
+
+        <param name="authType" type="compound">
+            <option name="anonymous" value="anonymous" />
+            <option name="accessToken" value="accesstoken">
+                <param name="secure:accessToken" dslName="accessToken" mandatory="true" />
+            </option>
+            <option name="usernameAndPassword" value="loginpassword">
+                <description>
+                    Authentication via login/password is deprecated by GitHub.
+                    We highly recommend that you authenticate with access tokens instead.
+                </description>
+                <param name="username" dslName="userName" mandatory="true"/>
+                <param name="secure:password" dslName="password" mandatory="true"/>
+            </option>
+        </param>
+
+        <param name="pattern" dslName="issuesPattern">
+            <description>
+                Issues ID pattern. Use regex syntax, e.g. '#(\d+)'.
+            </description>
+        </param>
+    </params>
+</dsl-extension>
