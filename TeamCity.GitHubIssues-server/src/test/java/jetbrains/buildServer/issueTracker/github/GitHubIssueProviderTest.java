@@ -19,6 +19,7 @@ package jetbrains.buildServer.issueTracker.github;
 import java.util.HashMap;
 import java.util.Map;
 import jetbrains.buildServer.BaseTestCase;
+import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.TestFor;
@@ -68,7 +69,7 @@ public class GitHubIssueProviderTest extends BaseTestCase {
       allowing(model);
     }});
     final GitHubIssueProviderFactory factory = new GitHubIssueProviderFactory(myType, fetcher, storage, model);
-    myProvider = (GitHubIssueProvider) factory.createProvider();
+    myProvider = (GitHubIssueProvider) factory.createProvider(m.mock(SProject.class));
   }
 
   @Test
