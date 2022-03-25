@@ -23,6 +23,7 @@ import jetbrains.buildServer.issueTracker.IssueProviderType;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
+import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.oauth.OAuthToken;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.SUser;
@@ -57,13 +58,18 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
   @NotNull
   private final UserModel myUserModel;
 
+  @NotNull
+  private final SProject myProject;
+
   public GitHubIssueProvider(@NotNull final IssueProviderType type,
                              @NotNull final IssueFetcher fetcher,
                              @NotNull final OAuthTokensStorage storage,
-                             @NotNull final UserModel userModel) {
+                             @NotNull final UserModel userModel,
+                             @NotNull SProject project) {
     super(type.getType(), fetcher);
     myStorage = storage;
     myUserModel = userModel;
+    myProject = project;
   }
 
   @NotNull

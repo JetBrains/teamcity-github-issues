@@ -20,6 +20,7 @@ import jetbrains.buildServer.issueTracker.AbstractIssueProviderFactory;
 import jetbrains.buildServer.issueTracker.IssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueProvider;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
+import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +48,7 @@ public class GitHubIssueProviderFactory extends AbstractIssueProviderFactory {
   }
 
   @NotNull
-  public IssueProvider createProvider() {
-    return new GitHubIssueProvider(myType, myFetcher, myStorage, myUserModel);
+  public IssueProvider createProvider(@NotNull SProject project) {
+    return new GitHubIssueProvider(myType, myFetcher, myStorage, myUserModel, project);
   }
 }
