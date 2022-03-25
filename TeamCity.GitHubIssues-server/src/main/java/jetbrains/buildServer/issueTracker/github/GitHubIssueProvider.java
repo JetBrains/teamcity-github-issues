@@ -186,7 +186,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
           if (tokenUser != null) {
             final String providerId = m.group(2);
             final String oauthUserId = m.group(3);
-            final Set<OAuthToken> tokens = myStorage.getUserTokens(providerId, tokenUser);
+            final Set<OAuthToken> tokens = myStorage.getUserTokens(providerId, tokenUser, myProject, false);
             OAuthToken result = null;
             for (OAuthToken t: tokens) {
               if (t.getOauthLogin().equals(oauthUserId)) {
