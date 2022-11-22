@@ -65,6 +65,7 @@
                     authType = accessToken {
                         accessToken = "credentialsJSON:*****"
                     }
+                    issuesPattern = "&lt;Issue id pattern>" // optional, assumed #(\d+) if omitted
                 }
             </code>
         </example>
