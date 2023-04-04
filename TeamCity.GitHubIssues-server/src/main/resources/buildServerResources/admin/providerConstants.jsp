@@ -25,10 +25,10 @@
 <c:set var="password" value="<%=GitHubConstants.PARAM_PASSWORD%>"/>
 <c:set var="accessToken" value="<%=GitHubConstants.PARAM_ACCESS_TOKEN%>"/>
 <c:set var="pattern" value="<%=GitHubConstants.PARAM_PATTERN%>"/>
+<c:set var="tokenId" value="<%=GitHubConstants.PARAM_TOKEN_ID%>" />
 
 
 <c:set var="authAnonymous" value="<%=GitHubConstants.AUTH_ANONYMOUS%>"/>
 <c:set var="authLoginPassword" value="<%=GitHubConstants.AUTH_LOGINPASSWORD%>"/>
 <c:set var="authAccessToken" value="<%=GitHubConstants.AUTH_ACCESSTOKEN%>"/>
-
-
+<c:set var="authGitHubApp" value="<%=GitHubConstants.AUTH_STORED_TOKEN%>" />

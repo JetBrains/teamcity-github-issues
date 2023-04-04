@@ -4,6 +4,7 @@
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="bs" tagdir="/WEB-INF/tags"%>
+<%@ taglib prefix="oauth" tagdir="/WEB-INF/tags/oauth" %>
 
 <%--
   ~ Copyright 2000-2022 JetBrains s.r.o.
@@ -22,6 +23,7 @@
   --%>
 
 <jsp:useBean id="providerType" scope="request" type="jetbrains.buildServer.issueTracker.github.GitHubIssueProviderType"/>
+<jsp:useBean id="oauthConnections" scope="request" type="java.util.Map"/>
 
 <script type="text/javascript">
   (function() {
@@ -48,6 +50,36 @@
       }
     };
   })();
+
+  showTokenInfo = function () {
+    const tokenValue = $('${tokenId}').value;
+    if (tokenValue === null || tokenValue.trim().length == 0) {
+      $('message_acquire_token').innerHTML = "No access token configured"
+    } else {
+      $('message_acquire_token').innerHTML = "There is an access token configured"
+    }
+  };
+
+
+  setAcquiredToken = function(it) {
+    const tokenValue = $('${tokenId}').value;
+    if ((tokenValue === null || tokenValue.trim().length == 0) && (it === null || it["tokenId"] === null)) {
+      $('message_acquire_token').innerHTML = "No access token configured"
+    } else {
+      $('error_${tokenId}').empty();
+      if (tokenValue == it["tokenId"]) {
+        $('message_acquire_token').innerHTML = "New token wasn't issued because existing token is valid.";
+      } else if (it["acquiredNew"] == true) {
+        $('${tokenId}').value = it["tokenId"];
+        $('message_acquire_token').innerHTML = "New token was issued";
+      } else {
+        $('${tokenId}').value = it["tokenId"];
+        $('message_acquire_token').innerHTML = "Token for this Build feature was replaced by previously saved token";
+      }
+    }
+  };
+
+  showTokenInfo();
 </script>
 
 <div>
@@ -71,6 +103,7 @@
       <td>
         <props:textProperty name="${repository}" maxlength="100"/>
         <jsp:include page="/admin/repositoryControls.html?projectId=${project.externalId}&pluginName=github"/>
+        <jsp:include page="/admin/repositoryControls.html?projectId=${project.externalId}&pluginName=githubApp"/>
         <span id="error_${repository}" class="error"></span>
       </td>
     </tr>
@@ -83,6 +116,7 @@
           <props:option value="${authAnonymous}">Anonymous</props:option>
           <props:option value="${authAccessToken}">Access Token</props:option>
           <props:option value="${authLoginPassword}">Username / Password</props:option>
+          <props:option value="${authGitHubApp}">GitHub App access token</props:option>
         </props:selectProperty>
         <span id="error_${authType}" class="error"></span>
         <div class="js_authsetting ${authLoginPassword} attentionComment">
@@ -113,6 +147,32 @@
         <span id="error_${accessToken}" class="error"></span>
       </td>
     </tr>
+
+    <tr class="js_authsetting ${authGitHubApp}">
+      <th><label for="${tokenId}" class="shortLabel">GitHub App token:</label></th>
+      <td>
+        <c:forEach items="${oauthConnections.keySet()}" var="connection">
+          <c:if test="${connection.oauthProvider.isTokenRefreshSupported()}">
+            <div class="token-connection">
+                <span title="<c:out value='${connection.id}' />" id="issuedTokenId">
+                  <span id="issuedForTitle">Issued via</span>
+                  <!-- we can't determine user by userId in tokenId now -->
+                  <strong id="connectionDisplayName">
+                    <c:out value="${connection.connectionDisplayName}" />
+                  </strong>
+                </span>
+              <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="setAcquiredToken">
+                Acquire new
+              </oauth:obtainToken>
+            </div>
+          </c:if>
+        </c:forEach>
+        <props:hiddenProperty name="${tokenId}" />
+        <span class="error" id="error_${tokenId}"></span>
+        <span id="message_acquire_token"></span>
+      </td>
+    </tr>
+
     <tr>
       <th><label for="${pattern}" class="shortLabel">Issue ID Pattern:<l:star/></label></th>
       <td>
@@ -131,8 +191,13 @@
       BS.Repositories.installControls($('repository'), function(repoInfo, cre) {
         $('${name}').value = repoInfo.owner + "/" + repoInfo.name;
         $('${repository}').value = repoInfo.repositoryUrl;
-        $('${accessToken}').value = "oauth:<%=SessionUser.getUser(request).getId()%>:" + cre.oauthProviderId + ":" + cre.oauthLogin;
-        $('${authType}_select').value = "${authAccessToken}";
+        if (cre['refreshableToken']) {
+          $('${authType}_select').value = "${authGitHubApp}";
+        }
+        else {
+          $('${accessToken}').value = "oauth:<%=SessionUser.getUser(request).getId()%>:" + cre.oauthProviderId + ":" + cre.oauthLogin;
+          $('${authType}_select').value = "${authAccessToken}";
+        }
         BS.GitHubIssues.selectAuthType();
       });
     }

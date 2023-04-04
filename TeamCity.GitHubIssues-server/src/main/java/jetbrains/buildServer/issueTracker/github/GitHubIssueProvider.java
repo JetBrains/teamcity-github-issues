@@ -75,7 +75,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
   @NotNull
   @Override
   protected IssueFetcherAuthenticator getAuthenticator() {
-    return new GitHubAuthenticator(myProperties);
+    return new GitHubAuthenticator(myProperties, myProject, myStorage);
   }
 
   @Override
@@ -127,6 +127,8 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
         checkNotEmptyParam(result, map, PARAM_PASSWORD, "Password must be specified");
       } else if (authTypeParam.equals(AUTH_ACCESSTOKEN)) {
         checkNotEmptyParam(result, map, PARAM_ACCESS_TOKEN, "Access token must be specified");
+      } else if (authTypeParam.equals(AUTH_STORED_TOKEN)) {
+        checkNotEmptyParam(result, map, PARAM_TOKEN_ID, "Token id token must be specified");
       }
 
       if (checkNotEmptyParam(result, map, PARAM_PATTERN, "Issue pattern must not be empty")) {

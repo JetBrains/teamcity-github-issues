@@ -17,8 +17,10 @@
 package jetbrains.buildServer.issueTracker.github.auth;
 
 import com.intellij.openapi.util.text.StringUtil;
-import jetbrains.buildServer.issueTracker.BasicIssueFetcherAuthenticator;
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
+import jetbrains.buildServer.serverSide.SProject;
+import jetbrains.buildServer.serverSide.oauth.OAuthToken;
+import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.util.HTTPRequestBuilder;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpMethod;
@@ -39,7 +41,7 @@ public class GitHubAuthenticator implements IssueFetcherAuthenticator {
 
   private Credentials myCredentials = null;
 
-  public GitHubAuthenticator(@NotNull final Map<String, String> properties) {
+  public GitHubAuthenticator(@NotNull final Map<String, String> properties, SProject project, OAuthTokensStorage tokenStorage) {
     final String authType = properties.get(PARAM_AUTH_TYPE);
     if (AUTH_LOGINPASSWORD.equals(authType)) {
       final String username = properties.get(PARAM_USERNAME);
@@ -49,6 +51,12 @@ public class GitHubAuthenticator implements IssueFetcherAuthenticator {
       final String token = properties.get(PARAM_ACCESS_TOKEN);
       if (!StringUtil.isEmptyOrSpaces(token)) {
         myCredentials = new TokenCredentials(token);
+      }
+    } else if (AUTH_STORED_TOKEN.equals(authType)) {
+      final String tokenId = properties.get(PARAM_TOKEN_ID);
+      final OAuthToken gitHubOAuthToken = tokenStorage.getRefreshableToken(project, tokenId);
+      if (gitHubOAuthToken != null) {
+        myCredentials = new TokenCredentials(gitHubOAuthToken.getAccessToken());
       }
     }
   }

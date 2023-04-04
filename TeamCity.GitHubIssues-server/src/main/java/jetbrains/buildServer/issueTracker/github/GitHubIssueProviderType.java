@@ -16,6 +16,8 @@
 
 package jetbrains.buildServer.issueTracker.github;
 
+import java.util.Collections;
+import java.util.List;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
@@ -79,5 +81,11 @@ public class GitHubIssueProviderType extends IssueProviderType {
       put(PARAM_AUTH_TYPE, AUTH_ANONYMOUS);
       put(PARAM_PATTERN, DEFAULT_ISSUE_PATTERN);
     }};
+  }
+
+  @NotNull
+  @Override
+  public List<String> getConnectionTypes() {
+    return Collections.singletonList("GitHubApp");
   }
 }

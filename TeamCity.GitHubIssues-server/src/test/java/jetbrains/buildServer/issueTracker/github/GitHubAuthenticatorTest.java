@@ -21,9 +21,15 @@ import java.util.Map;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
+import jetbrains.buildServer.serverSide.SProject;
+import jetbrains.buildServer.serverSide.oauth.OAuthToken;
+import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.util.TestFor;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,11 +40,16 @@ public class GitHubAuthenticatorTest extends BaseTestCase {
 
   private Map<String, String> myProperties;
 
+  private Mockery m;
+
   @Override
   @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
     myProperties = new HashMap<String, String>();
+    m = new Mockery() {{
+      setImposteriser(ClassImposteriser.INSTANCE);
+    }};
   }
 
   @Test
@@ -85,8 +96,26 @@ public class GitHubAuthenticatorTest extends BaseTestCase {
     assertNull(result);
   }
 
+  @Test
+  public void testToken_OAuth_GitHubApp() throws Exception {
+    myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_STORED_TOKEN);
+    myProperties.put(GitHubConstants.PARAM_TOKEN_ID, "tc_token_id:APP:-1:dasdasdasda");
+    final Credentials result = getCredentials();
+    assertNotNull(result);
+    assertTrue(result instanceof  TokenCredentials);
+    assertEquals("token_value", ((TokenCredentials)result).getToken());
+  }
+
   private Credentials getCredentials() {
-    return new GitHubAuthenticator(myProperties).getCredentials();
+    SProject project = m.mock(SProject.class);
+
+    OAuthTokensStorage tokenStorage = m.mock(OAuthTokensStorage.class);
+    m.checking(new Expectations() {{
+      allowing(tokenStorage).getRefreshableToken(with(any(SProject.class)), with(any(String.class)));
+      will(returnValue(new OAuthToken("token_value", "scope", "login", 123, -1)));
+    }});
+
+    return new GitHubAuthenticator(myProperties, project, tokenStorage).getCredentials();
   }
 
 }

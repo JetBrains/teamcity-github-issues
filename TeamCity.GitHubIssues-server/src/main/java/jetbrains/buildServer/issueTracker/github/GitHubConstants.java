@@ -32,8 +32,12 @@ public interface GitHubConstants {
   String PARAM_ACCESS_TOKEN = "secure:accessToken";
   String PARAM_PATTERN = "pattern";
 
+  String PARAM_TOKEN_ID = "tokenId";
+
   String AUTH_ANONYMOUS = "anonymous";
   String AUTH_LOGINPASSWORD = "loginpassword";
   String AUTH_ACCESSTOKEN = "accesstoken";
+
+  String AUTH_STORED_TOKEN = "storedToken";
   Pattern OWNER_AND_REPO_PATTERN = Pattern.compile("/?([^/]+)/([^/]+)/?$");
 }
