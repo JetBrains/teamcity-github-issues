@@ -36,11 +36,21 @@
             </option>
             <option name="usernameAndPassword" value="loginpassword">
                 <description>
-                    Authentication via login/password is deprecated by GitHub.
+                    Authentication via login/password is no longer supported by GitHub.
                     We highly recommend that you authenticate with access tokens instead.
                 </description>
                 <param name="username" dslName="userName" mandatory="true"/>
                 <param name="secure:password" dslName="password" mandatory="true"/>
+            </option>
+            <option name="storedToken" value="storedToken">
+                <description>
+                    Use GitHub App credentials
+                </description>
+                <param name="tokenId" dslName="tokenId" mandatory="true">
+                    <description>
+                        Internal ID of a token in TeamCity token storage
+                    </description>
+                </param>
             </option>
         </param>
 
