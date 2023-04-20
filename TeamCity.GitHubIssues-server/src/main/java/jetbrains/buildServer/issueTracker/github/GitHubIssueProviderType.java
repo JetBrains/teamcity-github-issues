@@ -16,14 +16,12 @@
 
 package jetbrains.buildServer.issueTracker.github;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
+import jetbrains.buildServer.serverSide.ParametersDescriptor;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
 
@@ -35,6 +33,14 @@ import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
 public class GitHubIssueProviderType extends IssueProviderType {
 
   public static final String TYPE = "GithubIssues";
+
+
+  public static final String CONNECTION_SUBTYPE = "connectionSubtype";
+
+  public static final String ALL_IN_ONE_SUBTYPE = "gitHubApp";
+  public static final String INSTALLATION_SUBTYPE = "gitHubAppInstallation";
+
+  public static final List<String> ALLOWED_SUBTYPES = Arrays.asList(ALL_IN_ONE_SUBTYPE, INSTALLATION_SUBTYPE);
 
   @NotNull
   private final String myConfigUrl;
@@ -85,7 +91,9 @@ public class GitHubIssueProviderType extends IssueProviderType {
 
   @NotNull
   @Override
-  public List<String> getConnectionTypes() {
-    return Collections.singletonList("GitHubApp");
+  public Map<String, Predicate<ParametersDescriptor>> getConnectionTypes() {
+    return new LinkedHashMap<String, Predicate<ParametersDescriptor>>(){{
+      put("GitHubApp", connection -> ALLOWED_SUBTYPES.contains(connection.getParameters().get(CONNECTION_SUBTYPE)));
+    }};
   }
 }
