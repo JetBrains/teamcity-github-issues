@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.issueTracker.github;
 
+import com.google.common.collect.Sets;
 import java.util.*;
 import java.util.function.Predicate;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
@@ -40,7 +41,7 @@ public class GitHubIssueProviderType extends IssueProviderType {
   public static final String ALL_IN_ONE_SUBTYPE = "gitHubApp";
   public static final String INSTALLATION_SUBTYPE = "gitHubAppInstallation";
 
-  public static final List<String> ALLOWED_SUBTYPES = Arrays.asList(ALL_IN_ONE_SUBTYPE, INSTALLATION_SUBTYPE);
+  public static final Set<String> ALLOWED_SUBTYPES = Sets.newHashSet(ALL_IN_ONE_SUBTYPE, INSTALLATION_SUBTYPE);
 
   @NotNull
   private final String myConfigUrl;
@@ -92,7 +93,7 @@ public class GitHubIssueProviderType extends IssueProviderType {
   @NotNull
   @Override
   public Map<String, Predicate<ParametersDescriptor>> getConnectionTypes() {
-    return new LinkedHashMap<String, Predicate<ParametersDescriptor>>(){{
+    return new HashMap<String, Predicate<ParametersDescriptor>>(){{
       put("GitHubApp", connection -> ALLOWED_SUBTYPES.contains(connection.getParameters().get(CONNECTION_SUBTYPE)));
     }};
   }
