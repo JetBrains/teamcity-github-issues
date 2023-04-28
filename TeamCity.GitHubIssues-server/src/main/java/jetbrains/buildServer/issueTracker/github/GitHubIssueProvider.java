@@ -21,7 +21,9 @@ import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.oauth.*;
+import jetbrains.buildServer.serverSide.connections.RefreshableToken;
+import jetbrains.buildServer.serverSide.oauth.OAuthToken;
+import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.StringUtil;
@@ -181,9 +183,9 @@ public class GitHubIssueProvider extends AbstractPatternBasedIssueProvider {
           if (tokenUser != null) {
             final String providerId = m.group(2);
             final String oauthUserId = m.group(3);
-            final Set<OAuthToken> tokens = myStorage.getUserTokens(providerId, tokenUser, myProject, false);
-            OAuthToken result = null;
-            for (OAuthToken t: tokens) {
+            final Set<RefreshableToken> tokens = myStorage.getUserTokens(providerId, tokenUser, myProject, false);
+            RefreshableToken result = null;
+            for (RefreshableToken t: tokens) {
               if (t.getOauthLogin().equals(oauthUserId)) {
                 result = t;
               }

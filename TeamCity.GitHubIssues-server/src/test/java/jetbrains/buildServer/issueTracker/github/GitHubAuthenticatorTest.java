@@ -23,6 +23,7 @@ import jetbrains.buildServer.issueTracker.IssueTrackerConstants;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
 import jetbrains.buildServer.serverSide.SProject;
+import jetbrains.buildServer.serverSide.connections.RefreshableTokenImpl;
 import jetbrains.buildServer.serverSide.oauth.OAuthToken;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.util.TestFor;
@@ -113,7 +114,7 @@ public class GitHubAuthenticatorTest extends BaseTestCase {
     OAuthTokensStorage tokenStorage = m.mock(OAuthTokensStorage.class);
     m.checking(new Expectations() {{
       allowing(tokenStorage).getRefreshableToken(with(any(SProject.class)), with(any(String.class)));
-      will(returnValue(new OAuthToken("token_value", "scope", "login", 123, -1)));
+      will(returnValue(new RefreshableTokenImpl("token_value", "scope", "login", 123, -1)));
     }});
 
     return new GitHubAuthenticator(myProperties, project, tokenStorage).getCredentials();

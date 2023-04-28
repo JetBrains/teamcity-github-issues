@@ -19,6 +19,7 @@ package jetbrains.buildServer.issueTracker.github.auth;
 import com.intellij.openapi.util.text.StringUtil;
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
 import jetbrains.buildServer.serverSide.SProject;
+import jetbrains.buildServer.serverSide.connections.RefreshableToken;
 import jetbrains.buildServer.serverSide.oauth.OAuthToken;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.util.HTTPRequestBuilder;
@@ -56,7 +57,7 @@ public class GitHubAuthenticator implements IssueFetcherAuthenticator {
       }
     } else if (AUTH_STORED_TOKEN.equals(authType)) {
       final String tokenId = properties.get(PARAM_TOKEN_ID);
-      final OAuthToken gitHubOAuthToken = tokenStorage.getRefreshableToken(project, tokenId);
+      final RefreshableToken gitHubOAuthToken = tokenStorage.getRefreshableToken(project, tokenId);
       if (gitHubOAuthToken != null) {
         myCredentials = new TokenCredentials(gitHubOAuthToken.getAccessToken());
       }
