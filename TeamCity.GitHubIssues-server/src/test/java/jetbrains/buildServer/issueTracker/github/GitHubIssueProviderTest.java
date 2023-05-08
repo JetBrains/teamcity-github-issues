@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.serverSide.SProject;
+import jetbrains.buildServer.serverSide.oauth.OAuthConnectionsManager;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.TestFor;
@@ -68,7 +69,7 @@ public class GitHubIssueProviderTest extends BaseTestCase {
       allowing(storage);
       allowing(model);
     }});
-    final GitHubIssueProviderFactory factory = new GitHubIssueProviderFactory(myType, fetcher, storage, model);
+    final GitHubIssueProviderFactory factory = new GitHubIssueProviderFactory(myType, fetcher, storage, model, m.mock(OAuthConnectionsManager.class));
     myProvider = (GitHubIssueProvider) factory.createProvider(m.mock(SProject.class));
   }
 

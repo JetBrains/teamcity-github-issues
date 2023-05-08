@@ -21,6 +21,7 @@ import jetbrains.buildServer.issueTracker.IssueFetcher;
 import jetbrains.buildServer.issueTracker.IssueProvider;
 import jetbrains.buildServer.issueTracker.IssueProviderType;
 import jetbrains.buildServer.serverSide.SProject;
+import jetbrains.buildServer.serverSide.oauth.OAuthConnectionsManager;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
@@ -38,17 +39,22 @@ public class GitHubIssueProviderFactory extends AbstractIssueProviderFactory {
   @NotNull
   private final UserModel myUserModel;
 
+  @NotNull
+  protected final OAuthConnectionsManager myOAuthConnectionsManager;
+
   public GitHubIssueProviderFactory(@NotNull final IssueProviderType type,
                                     @NotNull final IssueFetcher fetcher,
                                     @NotNull final OAuthTokensStorage storage,
-                                    @NotNull final UserModel userModel) {
+                                    @NotNull final UserModel userModel,
+                                    @NotNull OAuthConnectionsManager OAuthConnectionsManager) {
     super(type, fetcher);
     myStorage = storage;
     myUserModel = userModel;
+    myOAuthConnectionsManager = OAuthConnectionsManager;
   }
 
   @NotNull
   public IssueProvider createProvider(@NotNull SProject project) {
-    return new GitHubIssueProvider(myType, myFetcher, myStorage, myUserModel, project);
+    return new GitHubIssueProvider(myType, myFetcher, myStorage, myUserModel, project, myOAuthConnectionsManager);
   }
 }
