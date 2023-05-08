@@ -24,8 +24,7 @@ import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.oauth.OAuthToken;
-import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
+import jetbrains.buildServer.serverSide.oauth.*;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.StringUtil;
@@ -61,15 +60,20 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
   @NotNull
   private final SProject myProject;
 
+  @NotNull
+  protected final OAuthConnectionsManager myOAuthConnectionsManager;
+
   public GitHubIssueProvider(@NotNull final IssueProviderType type,
                              @NotNull final IssueFetcher fetcher,
                              @NotNull final OAuthTokensStorage storage,
                              @NotNull final UserModel userModel,
-                             @NotNull SProject project) {
+                             @NotNull SProject project,
+                             @NotNull OAuthConnectionsManager OAuthConnectionsManager) {
     super(type.getType(), fetcher);
     myStorage = storage;
     myUserModel = userModel;
     myProject = project;
+    myOAuthConnectionsManager = OAuthConnectionsManager;
   }
 
   @NotNull
@@ -202,5 +206,35 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
         }
       }
     }
+  }
+
+  @NotNull
+  @Override
+  public Map<String, Object> getSpecificAttributes(@NotNull Map<String, String> properties) {
+    Map<String, Object> result =  new HashMap<>();
+
+    final String tokenId = properties.get(PARAM_TOKEN_ID);
+    if (StringUtil.isEmptyOrSpaces(tokenId)) {
+      return result;
+    }
+
+    final OAuthToken token = myStorage.getRefreshableToken(myProject, tokenId);
+    if (token == null) {
+      return result;
+    }
+
+    final TokenFullIdComponents tokenIdComponents = OAuthTokensStorage.parseFullTokenId(tokenId);
+    if (tokenIdComponents == null) {
+      return result;
+    }
+
+    final OAuthConnectionDescriptor connection = myOAuthConnectionsManager.findConnectionByTokenStorageId(myProject, tokenIdComponents.getTokenStorageId());
+    if (connection == null) {
+      return result;
+    }
+
+    result.put("tokenConnection", connection.getConnectionDisplayName());
+
+    return result;
   }
 }

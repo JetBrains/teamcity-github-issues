@@ -51,35 +51,6 @@
     };
   })();
 
-  showTokenInfo = function () {
-    const tokenValue = $('${tokenId}').value;
-    if (tokenValue === null || tokenValue.trim().length == 0) {
-      $('message_acquire_token').innerHTML = "No access token configured"
-    } else {
-      $('message_acquire_token').innerHTML = "There is an access token configured"
-    }
-  };
-
-
-  setAcquiredToken = function(it) {
-    const tokenValue = $('${tokenId}').value;
-    if ((tokenValue === null || tokenValue.trim().length == 0) && (it === null || it["tokenId"] === null)) {
-      $('message_acquire_token').innerHTML = "No access token configured"
-    } else {
-      $('error_${tokenId}').empty();
-      if (tokenValue == it["tokenId"]) {
-        $('message_acquire_token').innerHTML = "New token wasn't issued because existing token is valid.";
-      } else if (it["acquiredNew"] == true) {
-        $('${tokenId}').value = it["tokenId"];
-        $('message_acquire_token').innerHTML = "New token was issued";
-      } else {
-        $('${tokenId}').value = it["tokenId"];
-        $('message_acquire_token').innerHTML = "Token for this Build feature was replaced by previously saved token";
-      }
-    }
-  };
-
-  showTokenInfo();
 </script>
 
 <div>
@@ -151,25 +122,40 @@
     <tr class="js_authsetting ${authGitHubApp}">
       <th><label for="${tokenId}" class="shortLabel">GitHub App token:</label></th>
       <td>
+        <%@include file="/WEB-INF/_tokenSupport.jspf"%>
+
+        <span class="access-token-note" id="message_no_token">No access token configured.</span>
+        <span class="access-token-note" id="message_we_have_token">[token info message]</span>
+
+        <c:if test="${empty oauthConnections}">
+          <br/>
+          <span>There are no GitHub App connections available to the project.</span>
+        </c:if>
+
+        <props:hiddenProperty name="${tokenId}" />
+        <span class="error" id="error_${tokenId}"></span>
+
         <c:forEach items="${oauthConnections.keySet()}" var="connection">
           <c:if test="${connection.oauthProvider.isTokenRefreshSupported()}">
+            <script type="application/javascript">
+              BS.AuthTypeTokenSupport.connections['${connection.id}'] = '<bs:forJs>${connection.connectionDisplayName}</bs:forJs>';
+            </script>
             <div class="token-connection">
-                <span title="<c:out value='${connection.id}' />" id="issuedTokenId">
-                  <span id="issuedForTitle">Issued via</span>
-                  <!-- we can't determine user by userId in tokenId now -->
-                  <strong id="connectionDisplayName">
+                  <span class="token-connection-diplay-name" title="<c:out value='${connection.id}' />">
                     <c:out value="${connection.connectionDisplayName}" />
-                  </strong>
-                </span>
-              <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="setAcquiredToken">
+                  </span>
+              <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="BS.AuthTypeTokenSupport.tokenCallback">
                 Acquire new
               </oauth:obtainToken>
             </div>
           </c:if>
         </c:forEach>
-        <props:hiddenProperty name="${tokenId}" />
-        <span class="error" id="error_${tokenId}"></span>
-        <span id="message_acquire_token"></span>
+
+        <c:set var="connectorType" value="GitHubApp"/>
+        <span class="smallNote connection-note" style="margin-left: 0px;">Add credentials via the
+                  <a href="<c:url value='/admin/editProject.html?projectId=${project.externalId}&tab=oauthConnections#addDialog=${connectorType}'/>" target="_blank" rel="noreferrer">Project Connections</a> page</span>
+
+
       </td>
     </tr>
 
