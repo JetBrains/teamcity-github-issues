@@ -122,10 +122,10 @@
     <tr class="js_authsetting ${authGitHubApp}">
       <th><label for="${tokenId}" class="shortLabel">GitHub App token:</label></th>
       <td>
-        <%@include file="/WEB-INF/_tokenSupport.jspf"%>
+        <%@include file="/admin/_tokenSupport.jspf"%>
 
         <span class="access-token-note" id="message_no_token">No access token configured.</span>
-        <span class="access-token-note" id="message_we_have_token">[token info message]</span>
+        <span class="access-token-note" id="message_we_have_token"></span>
 
         <c:if test="${empty oauthConnections}">
           <br/>
