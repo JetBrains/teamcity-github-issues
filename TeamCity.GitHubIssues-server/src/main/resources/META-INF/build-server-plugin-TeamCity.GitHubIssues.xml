@@ -25,5 +25,4 @@
   <bean class="jetbrains.buildServer.issueTracker.github.health.IssueTrackerSuggestion"/>
   <bean class="jetbrains.buildServer.issueTracker.github.health.PasswordAuthReport"/>
   <bean class="jetbrains.buildServer.issueTracker.github.health.HealthReportHelper"/>
-  <bean class="jetbrains.buildServer.serverSide.oauth.OAuthConnectionsManager" />
 </beans>
