@@ -179,6 +179,8 @@
         $('${repository}').value = repoInfo.repositoryUrl;
         if (cre['refreshableToken']) {
           $('${authType}_select').value = "${authGitHubApp}";
+          cre.connectionId = cre['oauthProviderId'];
+          BS.AuthTypeTokenSupport.tokenCallback(cre);
         }
         else {
           $('${accessToken}').value = "oauth:<%=SessionUser.getUser(request).getId()%>:" + cre.oauthProviderId + ":" + cre.oauthLogin;
