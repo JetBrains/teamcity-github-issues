@@ -79,5 +79,21 @@
                 }
             </code>
         </example>
+        <example>
+            <description>
+                Uses a GitHub App installation token stored in TeamCity.
+            </description>
+            <code>
+                githubIssues {
+                    id = "&lt;Connection ID>" // arbitrary ID, must be unique in the project
+                    displayName = "&lt;Connection display name>"
+                    repositoryURL = "&lt;GitHub repository URL>"
+                    authType = storedToken {
+                        tokenId = "tc_token_id:*****"
+                    }
+                    issuesPattern = "&lt;Issue id pattern>" // optional, assumed #(\d+) if omitted
+                }
+            </code>
+        </example>
     </examples>
 </dsl-extension>
