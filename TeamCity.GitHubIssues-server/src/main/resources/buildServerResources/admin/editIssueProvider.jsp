@@ -144,9 +144,11 @@
               <span class="token-connection-diplay-name" title="<c:out value='${connection.id}' />">
                 <c:out value="${connection.connectionDisplayName}" />
               </span>
-              <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="BS.AuthTypeTokenSupport.tokenCallback">
-                Acquire
-              </oauth:obtainToken>
+              <c:if test="${connection.oauthProvider.acquiringTokenSupported}">
+                <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="BS.AuthTypeTokenSupport.tokenCallback">
+                  Acquire
+                </oauth:obtainToken>
+              </c:if>
             </div>
           </c:if>
         </c:forEach>
