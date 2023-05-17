@@ -141,9 +141,9 @@
               BS.AuthTypeTokenSupport.connections['${connection.id}'] = '<bs:forJs>${connection.connectionDisplayName}</bs:forJs>';
             </script>
             <div class="token-connection">
-                  <span class="token-connection-diplay-name" title="<c:out value='${connection.id}' />">
-                    <c:out value="${connection.connectionDisplayName}" />
-                  </span>
+              <span class="token-connection-diplay-name" title="<c:out value='${connection.id}' />">
+                <c:out value="${connection.connectionDisplayName}" />
+              </span>
               <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="BS.AuthTypeTokenSupport.tokenCallback">
                 Acquire
               </oauth:obtainToken>
@@ -152,6 +152,7 @@
         </c:forEach>
 
         <c:set var="connectorType" value="GitHubApp"/>
+        <br/><br/>
         <span class="smallNote connection-note" style="margin-left: 0px;">Add credentials via the
                   <a href="<c:url value='/admin/editProject.html?projectId=${project.externalId}&tab=oauthConnections#addDialog=${connectorType}'/>" target="_blank" rel="noreferrer">Project Connections</a> page</span>
 
