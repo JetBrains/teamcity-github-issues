@@ -136,7 +136,7 @@
         <span class="error" id="error_${tokenId}"></span>
 
         <c:forEach items="${oauthConnections.keySet()}" var="connection">
-          <c:if test="${connection.oauthProvider.isTokenRefreshSupported()}">
+          <c:if test="${connection.oauthProvider.isTokenRefreshSupported() and connection.oauthProvider.acquiringTokenSupported}">
             <script type="application/javascript">
               BS.AuthTypeTokenSupport.connections['${connection.id}'] = '<bs:forJs>${connection.connectionDisplayName}</bs:forJs>';
             </script>
@@ -154,8 +154,7 @@
         </c:forEach>
 
         <c:set var="connectorType" value="GitHubApp"/>
-        <br/><br/>
-        <span class="smallNote connection-note" style="margin-left: 0px;">Add credentials via the
+        <span class="smallNote connection-note" style="margin-left: 0px;">You can add credentials via the
                   <a href="<c:url value='/admin/editProject.html?projectId=${project.externalId}&tab=oauthConnections#addDialog=${connectorType}'/>" target="_blank" rel="noreferrer">Project Connections</a> page</span>
 
 
