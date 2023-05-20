@@ -136,20 +136,22 @@
         <span class="error" id="error_${tokenId}"></span>
 
         <c:forEach items="${oauthConnections.keySet()}" var="connection">
-          <c:if test="${connection.oauthProvider.isTokenRefreshSupported() and connection.oauthProvider.acquiringTokenSupported}">
+          <c:if test="${connection.oauthProvider.isTokenRefreshSupported()}">
             <script type="application/javascript">
               BS.AuthTypeTokenSupport.connections['${connection.id}'] = '<bs:forJs>${connection.connectionDisplayName}</bs:forJs>';
             </script>
-            <div class="token-connection">
-              <span class="token-connection-diplay-name" title="<c:out value='${connection.id}' />">
-                <c:out value="${connection.connectionDisplayName}" />
-              </span>
-              <c:if test="${connection.oauthProvider.acquiringTokenSupported}">
-                <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="BS.AuthTypeTokenSupport.tokenCallback">
-                  Acquire
-                </oauth:obtainToken>
-              </c:if>
-            </div>
+            <c:if test="${connection.oauthProvider.acquiringTokenSupported}">
+              <div class="token-connection">
+                <span class="token-connection-diplay-name" title="<c:out value='${connection.id}' />">
+                  <c:out value="${connection.connectionDisplayName}" />
+                </span>
+                <c:if test="${connection.oauthProvider.acquiringTokenSupported}">
+                  <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="BS.AuthTypeTokenSupport.tokenCallback">
+                    Acquire
+                  </oauth:obtainToken>
+                </c:if>
+              </div>
+            </c:if>
           </c:if>
         </c:forEach>
 
