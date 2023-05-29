@@ -22,7 +22,6 @@ import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.connections.RefreshableToken;
-import jetbrains.buildServer.serverSide.oauth.OAuthToken;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;

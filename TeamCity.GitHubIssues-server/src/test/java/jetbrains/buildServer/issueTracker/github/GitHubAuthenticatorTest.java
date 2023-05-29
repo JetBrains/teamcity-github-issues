@@ -24,7 +24,6 @@ import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.connections.RefreshableTokenImpl;
-import jetbrains.buildServer.serverSide.oauth.OAuthToken;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.util.TestFor;
 import org.apache.commons.httpclient.Credentials;

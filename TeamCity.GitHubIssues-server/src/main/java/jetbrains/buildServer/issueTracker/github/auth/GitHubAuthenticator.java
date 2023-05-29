@@ -20,7 +20,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.connections.RefreshableToken;
-import jetbrains.buildServer.serverSide.oauth.OAuthToken;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
 import jetbrains.buildServer.util.HTTPRequestBuilder;
 import org.apache.commons.httpclient.Credentials;
