@@ -17,7 +17,13 @@
 package jetbrains.buildServer.issueTracker.github;
 
 import com.intellij.openapi.diagnostic.Logger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.KeyStore;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jetbrains.buildServer.issueTracker.AbstractIssueFetcher;
+import jetbrains.buildServer.issueTracker.HttpRequestException;
 import jetbrains.buildServer.issueTracker.IssueData;
 import jetbrains.buildServer.issueTracker.errors.NotFoundException;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
@@ -29,15 +35,10 @@ import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.eclipse.egit.github.core.Issue;
+import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.IssueService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyStore;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -73,6 +74,8 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
     } catch (MalformedURLException e) {
       LOG.warn(e);
       throw new RuntimeException(e);
+    } catch (RequestException e) {
+      throw new HttpRequestException(e.getStatus(), e.getError().getMessage(), e);
     }
   }
 
