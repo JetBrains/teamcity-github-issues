@@ -25,6 +25,15 @@
 <jsp:useBean id="providerType" scope="request" type="jetbrains.buildServer.issueTracker.github.GitHubIssueProviderType"/>
 <jsp:useBean id="oauthConnections" scope="request" type="java.util.Map"/>
 
+<style type="text/css">
+  .token-connection {
+    width: 85% !important;
+  }
+  .token-connection-diplay-name {
+    float: none !important;
+  }
+</style>
+
 <script type="text/javascript">
   (function() {
     BS.GitHubIssues = {
@@ -34,6 +43,7 @@
       init: function(select) {
         this.selector = $(select);
         this.selectAuthType();
+        this.onRepositoryChanged($('${repository}').value);
       },
 
       selectAuthType: function() {
@@ -47,8 +57,24 @@
                 .filter(s).removeClass('hidden').end()
                 .not(s).addClass('hidden');
         BS.MultilineProperties.updateVisible();
+      },
+
+      onRepositoryChanged: function(repository) {
+        if (repository && repository.length > 0) {
+          $j('#message_must_select_repo').hide();
+          $j('.token-connection').show();
+          $j('.connection-note').show();
+        } else {
+          $j('#message_must_select_repo').show();
+          $j('.token-connection').hide();
+          $j('.connection-note').hide();
+        }
       }
     };
+
+    window.getRepositoryUrl = function () {
+      return $('${repository}').value;
+    }
   })();
 
 </script>
@@ -72,7 +98,7 @@
     <tr>
       <th><label for="${repository}" class="shortLabel">Repository URL:<l:star/></label></th>
       <td>
-        <props:textProperty name="${repository}" maxlength="100"/>
+        <props:textProperty name="${repository}" maxlength="100" onchange="BS.GitHubIssues.onRepositoryChanged(value);"/>
         <jsp:include page="/admin/repositoryControls.html?projectId=${project.externalId}&pluginName=github"/>
         <jsp:include page="/admin/repositoryControls.html?projectId=${project.externalId}&pluginName=githubApp"/>
         <span id="error_${repository}" class="error"></span>
@@ -126,6 +152,7 @@
 
         <span class="access-token-note" id="message_no_token">No access token configured.</span>
         <span class="access-token-note" id="message_we_have_token"></span>
+        <span class="access-token-note" id="message_must_select_repo"><br/>A repository URL must be specified before tokens can be configured.</span>
 
         <c:if test="${empty oauthConnections}">
           <br/>
@@ -181,6 +208,7 @@
       BS.Repositories.installControls($('repository'), function(repoInfo, cre) {
         $('${name}').value = repoInfo.owner + "/" + repoInfo.name;
         $('${repository}').value = repoInfo.repositoryUrl;
+        BS.GitHubIssues.onRepositoryChanged(repoInfo.repositoryUrl);
         if (cre['refreshableToken']) {
           $('${authType}_select').value = "${authGitHubApp}";
           cre.connectionId = cre['oauthProviderId'];
