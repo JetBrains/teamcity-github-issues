@@ -18,6 +18,7 @@ package jetbrains.buildServer.issueTracker.github;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.*;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.oauth.OAuthTokensStorage;
@@ -27,6 +28,7 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -45,12 +47,15 @@ public class GitHubIssueProviderTest extends BaseTestCase {
   private GitHubIssueProviderType myType;
   private GitHubIssueProvider myProvider;
 
+  private final Synchroniser synchroniser = new Synchroniser();
+
   @Override
   @BeforeMethod
   public void setUp() throws Exception {
     super.setUp();
     m = new Mockery() {{
       setImposteriser(ClassImposteriser.INSTANCE);
+      setThreadingPolicy(synchroniser);
     }};
     myDescriptor = m.mock(PluginDescriptor.class);
     m.checking(new Expectations() {{
@@ -100,6 +105,30 @@ public class GitHubIssueProviderTest extends BaseTestCase {
   @Test
   public void testValidate_NewProvider_Valid() throws Exception {
     assertEmpty(myProvider.getPropertiesProcessor().process(getProperties("https://github.com/repo/owner")));
+  }
+
+  @Test(timeOut = 10000)
+  public void test_ReDoS_parsing_number() throws Exception {
+    ExecutorService regexExecutor = Executors.newSingleThreadExecutor();
+    Future<String> issueId = regexExecutor.submit(new Callable<String>() {
+      @Override
+      public String call() throws Exception {
+        Map<String, String> properties = getProperties("https://github.com/repo/owner");
+        properties.put("pattern", "(?<![a-zA-Z-])(((((a+)+)+)+)-\\d+)");
+        myProvider.setProperties(properties);
+        return myProvider.extractId("issue #aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab");
+      }
+    });
+
+    try {
+      issueId.get(3, TimeUnit.SECONDS);
+    } catch (ExecutionException e) {
+      //calculating was iterrupted by MatcherUtil due to ReDos vulnerability
+      assertTrue(e.getMessage().contains("regular expression is considered too time-consuming"));
+    } catch (TimeoutException te) {
+      //calculating should be interrupted by extractId method
+      fail("issue id calculating was not interrupted by extractId method");
+    }
   }
 
   private Map<String, String> getProperties(@NotNull final String repo) {
