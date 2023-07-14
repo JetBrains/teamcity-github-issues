@@ -16,10 +16,7 @@
 
 package jetbrains.buildServer.issueTracker.github;
 
-import jetbrains.buildServer.issueTracker.AbstractIssueProvider;
-import jetbrains.buildServer.issueTracker.IssueFetcher;
-import jetbrains.buildServer.issueTracker.IssueFetcherAuthenticator;
-import jetbrains.buildServer.issueTracker.IssueProviderType;
+import jetbrains.buildServer.issueTracker.*;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
@@ -45,7 +42,7 @@ import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
  *
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
-public class GitHubIssueProvider extends AbstractIssueProvider {
+public class GitHubIssueProvider extends AbstractPatternBasedIssueProvider {
 
   private static final String TOKEN_PREFIX_OAUTH = "oauth:";
 
@@ -97,12 +94,7 @@ public class GitHubIssueProvider extends AbstractIssueProvider {
   @NotNull
   @Override
   protected String extractId(@NotNull final String match) {
-    Matcher m = myPattern.matcher(match);
-    if (m.find() && m.groupCount() >= 1) {
-      return m.group(1);
-    } else {
-      return super.extractId(match);
-    }
+    return super.extractId(match);
   }
 
   @NotNull
