@@ -19,6 +19,7 @@ package jetbrains.buildServer.issueTracker.github;
 import java.util.HashMap;
 import java.util.Map;
 import jetbrains.buildServer.BaseTestCase;
+import jetbrains.buildServer.issueTracker.IssueTrackerConstants;
 import jetbrains.buildServer.issueTracker.github.auth.GitHubAuthenticator;
 import jetbrains.buildServer.issueTracker.github.auth.TokenCredentials;
 import jetbrains.buildServer.serverSide.SProject;
@@ -98,8 +99,8 @@ public class GitHubAuthenticatorTest extends BaseTestCase {
 
   @Test
   public void testToken_OAuth_GitHubApp() throws Exception {
-    myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, GitHubConstants.AUTH_STORED_TOKEN);
-    myProperties.put(GitHubConstants.PARAM_TOKEN_ID, "tc_token_id:APP:-1:dasdasdasda");
+    myProperties.put(GitHubConstants.PARAM_AUTH_TYPE, IssueTrackerConstants.AUTH_STORED_TOKEN);
+    myProperties.put(IssueTrackerConstants.PARAM_TOKEN_ID, "tc_token_id:APP:-1:dasdasdasda");
     final Credentials result = getCredentials();
     assertNotNull(result);
     assertTrue(result instanceof  TokenCredentials);

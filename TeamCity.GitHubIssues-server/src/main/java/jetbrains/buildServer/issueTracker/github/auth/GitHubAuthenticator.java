@@ -30,6 +30,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
+import static jetbrains.buildServer.issueTracker.IssueTrackerConstants.AUTH_STORED_TOKEN;
+import static jetbrains.buildServer.issueTracker.IssueTrackerConstants.PARAM_TOKEN_ID;
 import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
 
 /**

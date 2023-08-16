@@ -35,6 +35,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import static com.intellij.openapi.util.text.StringUtil.isEmptyOrSpaces;
+import static jetbrains.buildServer.issueTracker.IssueTrackerConstants.AUTH_STORED_TOKEN;
+import static jetbrains.buildServer.issueTracker.IssueTrackerConstants.PARAM_TOKEN_ID;
 import static jetbrains.buildServer.issueTracker.github.GitHubConstants.*;
 
 /**
