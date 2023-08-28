@@ -81,7 +81,7 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
 
   private String getIssueId(@NotNull final String idString) {
     final Matcher matcher = myPattern.matcher(idString);
-    if (matcher.find()) {
+    if (matcher.find() && matcher.groupCount() > 0) {
       return matcher.group(1);
     } else {
       return idString;
