@@ -64,10 +64,12 @@
           $j('#message_must_select_repo').hide();
           $j('.token-connection').show();
           $j('.connection-note').show();
+          $j('#tokenManagementContentContainer').show();
         } else {
           $j('#message_must_select_repo').show();
           $j('.token-connection').hide();
           $j('.connection-note').hide();
+          $j('#tokenManagementContentContainer').hide();
         }
       }
     };
@@ -159,34 +161,24 @@
           <span>There are no GitHub App connections available to the project.</span>
         </c:if>
 
+        <c:set var="canObtainTokens" value="${true}"/>
+        <c:set var="connectorType" value="GitHubApp"/>
+        <oauth:tokenControlsForFeatures
+            project="${project}"
+            providerTypes="'${connectorType}'"
+            tokenIntent="REPO_FULL"
+            canObtainTokens="${canObtainTokens}"
+            callback="BS.AuthTypeTokenSupport.tokenCallback"
+            oauthConnections="${oauthConnections.keySet()}"
+            checkForRefreshSupport="true">
+          <jsp:attribute name="addCredentialFragment">
+            <span class="smallNote connection-note" style="margin-left: 0px;">You can add credentials via the
+                  <a href="<c:url value='/admin/editProject.html?projectId=${project.externalId}&tab=oauthConnections#addDialog=${connectorType}'/>" target="_blank" rel="noreferrer">Project Connections</a> page</span>
+          </jsp:attribute>
+        </oauth:tokenControlsForFeatures>
+
         <props:hiddenProperty name="${tokenId}" />
         <span class="error" id="error_${tokenId}"></span>
-
-        <c:forEach items="${oauthConnections.keySet()}" var="connection">
-          <c:if test="${connection.oauthProvider.isTokenRefreshSupported()}">
-            <script type="application/javascript">
-              BS.AuthTypeTokenSupport.connections['${connection.id}'] = '<bs:forJs>${connection.connectionDisplayName}</bs:forJs>';
-            </script>
-            <c:if test="${connection.oauthProvider.acquiringTokenSupported}">
-              <div class="token-connection">
-                <span class="token-connection-diplay-name" title="<c:out value='${connection.id}' />">
-                  <c:out value="${connection.connectionDisplayName}" />
-                </span>
-                <c:if test="${connection.oauthProvider.acquiringTokenSupported}">
-                  <oauth:obtainToken connection="${connection}" className="btn btn_small token-connection-button" callback="BS.AuthTypeTokenSupport.tokenCallback">
-                    Acquire
-                  </oauth:obtainToken>
-                </c:if>
-              </div>
-            </c:if>
-          </c:if>
-        </c:forEach>
-
-        <c:set var="connectorType" value="GitHubApp"/>
-        <span class="smallNote connection-note" style="margin-left: 0px;">You can add credentials via the
-                  <a href="<c:url value='/admin/editProject.html?projectId=${project.externalId}&tab=oauthConnections#addDialog=${connectorType}'/>" target="_blank" rel="noreferrer">Project Connections</a> page</span>
-
-
       </td>
     </tr>
 
