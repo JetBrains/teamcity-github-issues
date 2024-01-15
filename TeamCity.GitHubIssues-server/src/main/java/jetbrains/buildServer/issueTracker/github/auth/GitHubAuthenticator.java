@@ -42,7 +42,7 @@ public class GitHubAuthenticator implements IssueFetcherAuthenticator {
       }
     } else if (AUTH_STORED_TOKEN.equals(authType)) {
       final String tokenId = properties.get(PARAM_TOKEN_ID);
-      final OAuthToken gitHubOAuthToken = tokenStorage.getRefreshableToken(project, tokenId);
+      final OAuthToken gitHubOAuthToken = tokenStorage.getToken(project, tokenId, true, true);
       if (gitHubOAuthToken != null) {
         myCredentials = new TokenCredentials(gitHubOAuthToken.getAccessToken());
       }

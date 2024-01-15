@@ -98,7 +98,7 @@ public class GitHubAuthenticatorTest extends BaseTestCase {
 
     OAuthTokensStorage tokenStorage = m.mock(OAuthTokensStorage.class);
     m.checking(new Expectations() {{
-      allowing(tokenStorage).getRefreshableToken(with(any(SProject.class)), with(any(String.class)));
+      allowing(tokenStorage).getToken(with(any(SProject.class)), with(any(String.class)), true, true);
       will(returnValue(new OAuthToken("token_value", "scope", "login", 123, -1)));
     }});
 
