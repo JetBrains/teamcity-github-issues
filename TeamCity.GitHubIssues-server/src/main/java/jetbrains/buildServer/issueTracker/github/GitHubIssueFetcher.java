@@ -152,7 +152,7 @@ public class GitHubIssueFetcher extends AbstractIssueFetcher {
   private static IssueData createIssueData(final Issue issue) {
     if (issue.getPullRequest() != null
             && TeamCityProperties.getBooleanOrTrue("teamcity.issues.github.filter.pull.requests")) {
-      throw new NotFoundException("Issue with id " + issue.getId() + " represents a pull request and is filtered out");
+      throw new NotFoundException("Issue #" + issue.getNumber() + " represents a pull request and is filtered out");
     }
     return new IssueData(Integer.toString(issue.getNumber()), issue.getTitle(), issue.getState(), issue.getHtmlUrl(), IssueService.STATE_CLOSED.equals(issue.getState()));
   }
