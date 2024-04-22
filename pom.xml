@@ -10,8 +10,16 @@
     <url>https://jetbrains.com</url>
   <properties>
     <teamcity-version>2020.1</teamcity-version>
+    <local.repo.path>local-repo</local.repo.path>
   </properties>
   <repositories>
+    <repository>
+      <id>local-teamcity-artifacts</id>
+      <url>file://${local.repo.path}</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
     <repository>
       <id>jetbrains-all</id>
       <url>https://download.jetbrains.com/teamcity-repository</url>
