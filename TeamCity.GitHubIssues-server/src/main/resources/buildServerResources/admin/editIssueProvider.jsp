@@ -51,11 +51,17 @@
           $j('.token-connection').show();
           $j('.connection-note').show();
           $j('#tokenManagementContentContainer').show();
+          if (BS.TokenControlParams) {
+            BS.TokenControls.showGenerateButtons();
+          }
         } else {
           $j('#message_must_select_repo').show();
           $j('.token-connection').hide();
           $j('.connection-note').hide();
           $j('#tokenManagementContentContainer').hide();
+          if (BS.TokenControlParams) {
+            BS.TokenControls.hideGenerateButtons();
+          }
         }
       }
     };
@@ -133,19 +139,17 @@
       </td>
     </tr>
 
-    <tr class="js_authsetting ${authGitHubApp}">
+    <tr id="ghaIssueTokenControls" class="js_authsetting ${authGitHubApp}">
       <th><label for="${tokenId}" class="shortLabel">GitHub App token:</label></th>
       <td>
-        <%@include file="/admin/_tokenSupport.jspf"%>
-
-        <span class="access-token-note" id="message_no_token">No access token configured.</span>
-        <span class="access-token-note" id="message_we_have_token"></span>
-        <span class="access-token-note" id="message_must_select_repo"><br/>A repository URL must be specified before tokens can be configured.</span>
+        <div class="access-token-note" id="message_must_select_repo">A repository URL must be specified before tokens can be configured.</div>
 
         <c:if test="${empty oauthConnections}">
-          <br/>
-          <span>There are no GitHub App connections available to the project.</span>
+          <div>There are no GitHub App connections available to the project.</div>
         </c:if>
+
+        <props:hiddenProperty name="${tokenId}" />
+        <span class="error" id="error_${tokenId}"></span>
 
         <c:set var="canObtainTokens" value="${true}"/>
         <c:set var="connectorType" value="GitHubApp"/>
@@ -156,15 +160,14 @@
             canObtainTokens="${canObtainTokens}"
             callback="BS.AuthTypeTokenSupport.tokenCallback"
             oauthConnections="${oauthConnections.keySet()}"
-            checkForRefreshSupport="true">
+            checkForRefreshSupport="true"
+            embedAfterRowElementId="ghaIssueTokenControls"
+            inputClassName="ghaTokenInput">
           <jsp:attribute name="addCredentialFragment">
             <span class="smallNote connection-note" style="margin-left: 0px;">You can add credentials via the
                   <a href="<c:url value='/admin/editProject.html?projectId=${project.externalId}&tab=oauthConnections#addDialog=${connectorType}'/>" target="_blank" rel="noreferrer">Project Connections</a> page</span>
           </jsp:attribute>
         </oauth:tokenControlsForFeatures>
-
-        <props:hiddenProperty name="${tokenId}" />
-        <span class="error" id="error_${tokenId}"></span>
       </td>
     </tr>
 
