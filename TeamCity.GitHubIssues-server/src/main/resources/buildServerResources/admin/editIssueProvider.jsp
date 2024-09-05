@@ -53,6 +53,7 @@
           $j('#tokenManagementContentContainer').show();
           if (BS.TokenControlParams) {
             BS.TokenControls.showGenerateButtons();
+            BS.NewTokenForm.applyConnectionFilter();
           }
         } else {
           $j('#message_must_select_repo').show();
@@ -60,6 +61,7 @@
           $j('.connection-note').hide();
           $j('#tokenManagementContentContainer').hide();
           if (BS.TokenControlParams) {
+            BS.NewTokenDialog.cancel();
             BS.TokenControls.hideGenerateButtons();
           }
         }
@@ -162,7 +164,8 @@
             oauthConnections="${oauthConnections.keySet()}"
             checkForRefreshSupport="true"
             embedAfterRowElementId="ghaIssueTokenControls"
-            inputClassName="ghaTokenInput">
+            inputClassName="ghaTokenInput"
+            filterConnectionsBy="window.getRepositoryUrl">
           <jsp:attribute name="addCredentialFragment">
             <span class="smallNote connection-note" style="margin-left: 0px;">You can add credentials via the
                   <a href="<c:url value='/admin/editProject.html?projectId=${project.externalId}&tab=oauthConnections#addDialog=${connectorType}'/>" target="_blank" rel="noreferrer">Project Connections</a> page</span>
