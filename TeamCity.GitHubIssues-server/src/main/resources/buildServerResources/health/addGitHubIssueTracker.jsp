@@ -24,7 +24,7 @@
     <c:set var="item" value="${itemEntry.value}"/>
      <div class="suggestionAction">
       <c:url var="url" value="/admin/editProject.html?init=1&projectId=${project.externalId}&tab=issueTrackers&#addTracker=${item['type']}&repoUrl=${util:urlEscape(item['repoUrl'])}&suggestedName=${util:urlEscape(item['suggestedName'])}"/>
-      <a class="tc-icon_before icon16 addNew" href="${url}">Add connection for ${item['suggestedName']}</a>
+      <a class="tc-icon_before icon16 addNew" href="${url}">Add connection for <c:out value="${item['suggestedName']}"/></a>
     </div>
   </c:forEach>
 </div>

@@ -165,6 +165,43 @@ public class SuggestionsTest extends BaseTestCase {
   }
 
   @Test
+  public void testTrailingSlashHttps() {
+    final String sourceUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues.git/";
+    final String expectedUrl = "https://github.com/JetBrains/TeamCity.GitHubIssues";
+    testSingleUrl(sourceUrl, expectedUrl);
+  }
+
+  @Test
+  public void testFragmentHttpsRejected() {
+    testSingleUrl("https://github.com/JetBrains/TeamCity.GitHubIssues#readme", null);
+  }
+
+  @Test
+  public void testFragmentWithPathHttpsRejected() {
+    testSingleUrl("https://github.com/JetBrains/TeamCity.GitHubIssues.git#refs/heads/main", null);
+  }
+
+  @Test
+  public void testQueryHttpsRejected() {
+    testSingleUrl("https://github.com/JetBrains/TeamCity.GitHubIssues?x=1", null);
+  }
+
+  @Test
+  public void testExtraPathSegmentHttpsRejected() {
+    testSingleUrl("https://github.com/JetBrains/TeamCity.GitHubIssues/tree/main", null);
+  }
+
+  @Test
+  public void testExtraPathSegmentSshRejected() {
+    testSingleUrl("git@github.com:JetBrains/sub/TeamCity.GitHubIssues.git", null);
+  }
+
+  @Test
+  public void testFragmentSshRejected() {
+    testSingleUrl("git@github.com:JetBrains/TeamCity.GitHubIssues#x.git", null);
+  }
+
+  @Test
   public void testParametrizedUrl() {
     final String sourceParametrizedUrl = "https://github.com/%project.owner%/%project.repo%";
     final String sourceUrl1 = "https://github.com/JetBrains/TeamCity.GitHubIssues";
