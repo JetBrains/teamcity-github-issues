@@ -14,7 +14,6 @@ import jetbrains.buildServer.serverSide.BuildTypeSettings;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.healthStatus.ProjectSuggestedItem;
-import jetbrains.buildServer.util.StringUtil;
 import jetbrains.buildServer.vcs.VcsRoot;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
@@ -33,10 +32,10 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
   private static final String GIT_FETCH_URL_PROPERTY = "url";
 
   /* Matches github ssh urls of format git@github.com:owner/repo.git */
-  private static final Pattern sshPattern = Pattern.compile("git@github\\.com:(.+)/(.+)(?:\\.git)");
+  private static final Pattern sshPattern = Pattern.compile("git@github\\.com:([^/?#]+)/([^/?#]+)\\.git");
 
-  /* Matches github http and https urls of format https://github.com/owner/repo.git */
-  private static final Pattern httpsPattern = Pattern.compile("http[s]?://github\\.com/(.*)/(.*)$");
+  /* Matches github http and https urls of format https://github.com/owner/repo.git, with optional .git and trailing slash */
+  private static final Pattern httpsPattern = Pattern.compile("https?://github\\.com/([^/?#]+)/([^/?#]+?)(?i:\\.git)?/?");
 
   @NotNull
   private final String myViewUrl;
@@ -115,7 +114,7 @@ public class IssueTrackerSuggestion extends ProjectSuggestion {
       m = httpsPattern.matcher(fetchUrl);
       if (m.matches()) {
         owner = m.group(1);
-        repo = StringUtil.removeSuffix(m.group(2), ".git", true);
+        repo = m.group(2);
         matched = true;
       }
     }
